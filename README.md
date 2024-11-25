@@ -63,6 +63,8 @@ See the help file `help geoboundary` for details.
 
 First make sure you are in the correct directory where the maps files have to be downloaded by setting the path: `cd ....`.
 
+### Download
+
 Download the raw shapefiles in ESRI format:
 
 ```stata
@@ -89,6 +91,9 @@ Global composite boundary can be downloaded as follows:
 geoboundary WLD, level(ADM0 ADM1) replace convert remove
 ```
 
+
+### Map
+
 Once the files are downloaded we can see if they are working.
 
 For Stata 16 or lower, we can use the `spmap` command:
@@ -101,7 +106,7 @@ spmap using WLD_ADM0_shp, id(_ID)
 ```
 
 
-<img src="/gis/world_spmap.png" width="100%">
+<img src="/GIS/world_spmap.png" width="100%">
 
 For Stata 17 or higher, we can use the `geoplot` command:
 
