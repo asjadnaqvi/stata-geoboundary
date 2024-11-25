@@ -52,7 +52,7 @@ graph set window fontface "Arial Narrow"
 Software packages take countless hours of programming, testing, and bug fixing. If you use this package, then a citation would be highly appreciated:
 
 
-Click here for the latest [SSC citation](https://ideas.repec.org/c/boc/bocode/s459154.html).
+Click here for the latest [SSC citation](XXXXXX).
 
 
 otherwise the following BibTeX citation can be used:
@@ -69,11 +69,10 @@ otherwise the following BibTeX citation can be used:
 
 
 
-The geoBoundary package [citation guidelines](https://www.geoboundaries.org/#tabs1-html) suggest that the database should be cited as follows:
+The geoBoundary package [citation guidelines](https://www.geoboundaries.org/#tabs1-html) suggest the following citation:
 
 
 Runfola, D. et al. (2020) geoBoundaries: A global database of political administrative boundaries. PLoS ONE 15(4): e0231866. https://doi.org/10.1371/journal.pone.0231866
-
 
 
 
