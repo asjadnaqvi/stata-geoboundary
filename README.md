@@ -87,14 +87,18 @@ geoboundary ISO3 codes, level(string) [ convert name(str) replace remove ]
 
 See `help geoboundary` for details.
 
-Please note that invalid `ISO3` names in a list of names will simply skip the processing. Check the geoBoundary website for the correct list. Some ISO3 classifications do assign different ISO3 codes to the same countries. E.g. for Germany both `DEU` (correct in geoboundary) and `GER` is used.
+Please note that invalid `ISO3` names in a list of names will be skipped and will be highlighted in the command window. Check the geoBoundary website for the correct ISO3 code. Some ISO3 classifications do assign different codes to the same countries, e.g. for Germany both `DEU` (correct in geoboundary) and `GER` are used.
 
-Admin levels for some countries are available upto the 5th level (ADM5). If you are specifying a list of countries with a large administrative boundary depth, e.g. `geoboundary PAK IND, level(ADM0 ADM1 ADM2 ADM4)`, the combination that does not exist will be skipped.
+For some countries, finer administrative boundaries are available upto the 5th level (ADM5). If you are specifying a list of countries with a large administrative boundary depth, e.g. `geoboundary PAK IND, level(ADM0 ADM1 ADM2 ADM4)`, the combination that does not exist will be skipped but highlighted in the output window.
 
 
 ## Examples
 
-First make sure you are in the correct directory where the maps files have to be downloaded by setting the path: `cd <mypath>`.
+Before starting, make sure you are in the correct directory where the maps files will be downloaded:
+
+```
+cd <mypath>
+```
 
 ### Download
 
