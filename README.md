@@ -12,7 +12,7 @@
 # geoboundary v1.0
 (25 Nov 2024)
 
-A package for fetching country-level or global boundaries from the [geoBoundary](https://www.geoboundaries.org/) database.
+A package for fetching country-level or global adminstrative boundaries from the [geoBoundary](https://www.geoboundaries.org/) database.
 
 Please note that by using the data provided through this package, you are acknowledging the [disclaimer](#Disclaimer).
 
