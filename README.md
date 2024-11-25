@@ -49,10 +49,13 @@ graph set window fontface "Arial Narrow"
 
 
 ## Citation guidelines
-Software packages take countless hours of programming, testing, and bug fixing. If you use this package, then a citation would be highly appreciated. Suggested citations:
+Software packages take countless hours of programming, testing, and bug fixing. If you use this package, then a citation would be highly appreciated:
 
 
-*in BibTeX*
+Click here for the latest [SSC citation](https://ideas.repec.org/c/boc/bocode/s459154.html).
+
+
+otherwise the following BibTeX citation can be used:
 
 ```BibTeX
 @software{sankey,
@@ -64,15 +67,13 @@ Software packages take countless hours of programming, testing, and bug fixing. 
 }
 ```
 
-Click here for the [SSC citation](https://ideas.repec.org/c/boc/bocode/s459154.html)
-
 
 
 The geoBoundary package [citation guidelines](https://www.geoboundaries.org/#tabs1-html) suggest that the database should be cited as follows:
 
-```BibTeX
+
 Runfola, D. et al. (2020) geoBoundaries: A global database of political administrative boundaries. PLoS ONE 15(4): e0231866. https://doi.org/10.1371/journal.pone.0231866
-```
+
 
 
 
