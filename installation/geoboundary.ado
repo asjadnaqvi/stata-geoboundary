@@ -11,13 +11,20 @@ https://github.com/wmgeolab/geoBoundaries/
 */
 
 /*
-The use of this package make no representations or warranties—express, implied, or statutory—as to the validity, accuracy, completeness, 
-or fitness for a particular purpose; nor represent that use of such works would not infringe privately owned rights; 
-nor assume any liability resulting from use of such works; and shall in no way be liable for any costs, expenses, 
-claims, or demands arising out of use of such works. 
 
-Please note that boundaries evolve over time, even within countries. Therefore ones used in the database might be wholly or partially 
-outdated. If accuracy is paramount, then please check the official sources for the latest possible information.
+The Geographic Information System (GIS) data provided herein is for informational/educational purposes only and is not intended for use 
+as a legal or engineering resource. While every effort has been made to ensure the accuracy and reliability of the data, it is provided 
+"as is" without warranty of any kind.
+
+The data provided through this GIS package assumes no liability for any inaccuracies, errors, or omissions in the data, 
+nor for any decision made or action taken based on the information contained herein. 
+Users of this data are responsible for verifying its accuracy and suitability for their intended purposes.
+
+Please be advised that GIS data may be subject to change without notice due to updates, corrections, or other modifications. 
+Users are encouraged to consult the original data sources or contact the provider for the most current information.
+
+By accessing or using the GIS data provided through this package, you acknowledge and agree to these terms and conditions.
+
 
 All files are in the standard EPSG: 4326 (WGS84) projection.
 
