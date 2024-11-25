@@ -61,7 +61,7 @@ See the help file `help geoboundary` for details.
 
 ## Examples
 
-First make sure you are in the correct directory where the maps files have to be downloaded by setting the path: `cd ....`.
+First make sure you are in the correct directory where the maps files have to be downloaded by setting the path: `cd <mypath>`.
 
 ### Download
 
