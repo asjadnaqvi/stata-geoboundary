@@ -85,8 +85,11 @@ The syntax for the latest version is as follows:
 geoboundary ISO3 codes, level(string) [ convert name(str) replace remove ]
 ```
 
-See the help file `help geoboundary` for details.
+See `help geoboundary` for details.
 
+Please note that invalid `ISO3` names in a list of names will simply skip the processing. Check the geoBoundary website for the correct list. Some ISO3 classifications do assign different ISO3 codes to the same countries. E.g. for Germany both `DEU` (correct in geoboundary) and `GER` is used.
+
+Admin levels for some countries are available upto the 5th level (ADM5). If you are specifying a list of countries with a large administrative boundary depth, e.g. `geoboundary PAK IND, level(ADM0 ADM1 ADM2 ADM4)`, the combination that does not exist will be skipped.
 
 
 ## Examples
