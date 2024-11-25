@@ -91,7 +91,7 @@ See `help geoboundary` for details.
 
 Please note that invalid `ISO3` names in a list of names will be skipped and will be highlighted in the command window. Check the geoBoundary website for the correct ISO3 code. Some ISO3 classifications do assign different codes to the same countries, e.g. for Germany both `DEU` (correct in geoboundary) and `GER` are used.
 
-If you are specifying a list of countries with a finer administrative boundaries, e.g. `geoboundary PAK IND, level(ADM0 ADM1 ADM2 ADM4)`, the **ISO3-ADMx** combination that does not exist will be skipped but highlighted in the output window.
+If you are specifying a list of countries with a finer administrative boundaries, e.g. `geoboundary PAK IND, level(ADM0 ADM1 ADM2 ADM4)`, the *ISO3-ADMx* combination that does not exist will be skipped but highlighted in the output window.
 
 
 ## Examples
