@@ -47,6 +47,36 @@ set scheme white_tableau
 graph set window fontface "Arial Narrow"
 ```
 
+
+## Citation guidelines
+Software packages take countless hours of programming, testing, and bug fixing. If you use this package, then a citation would be highly appreciated. Suggested citations:
+
+
+*in BibTeX*
+
+```BibTeX
+@software{sankey,
+   author = {Naqvi, Asjad},
+   title = {Stata package ``geoboundary''},
+   url = {https://github.com/asjadnaqvi/stata-geoboundary},
+   version = {1.0},
+   date = {2024-11-25}
+}
+```
+
+Click here for the [SSC citation](https://ideas.repec.org/c/boc/bocode/s459154.html)
+
+
+
+The geoBoundary package [citation guidelines](https://www.geoboundaries.org/#tabs1-html) suggest that the database should be cited as follows:
+
+```BibTeX
+Runfola, D. et al. (2020) geoBoundaries: A global database of political administrative boundaries. PLoS ONE 15(4): e0231866. https://doi.org/10.1371/journal.pone.0231866
+```
+
+
+
+
 ## Syntax
 
 The syntax for the latest version is as follows:
