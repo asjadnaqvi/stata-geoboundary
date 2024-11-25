@@ -1,0 +1,15 @@
+v 1.0
+d {bf:GEOBOUNDARY}: A Stata package for fetching geographical boundaries
+d
+d KW: Stata
+d KW: graphs
+d KW: gis
+d
+d Distribution-Date: 20241123
+d License: MIT
+d
+d Author: Asjad Naqvi
+d E-mail: asjadnaqvi@gmail.com
+d
+f geoboundary.ado
+f geoboundary.sthlp

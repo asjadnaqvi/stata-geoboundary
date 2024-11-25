@@ -1,0 +1,9 @@
+v 1.0
+d GEOBOUNDARY: A Stata package for boundary data
+d  
+d Distribution-Date: 20241123
+d
+d Asjad Naqvi
+d asjadnaqvi@gmail.com
+d https://medium.com/the-stata-guide
+
