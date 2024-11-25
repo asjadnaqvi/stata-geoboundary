@@ -135,7 +135,7 @@ syntax anything, level(string) [convert replace remove name(string) ]
 					// convert (if specified)
 					if "`convert'" != "" {
 						
-						noisily display in yellow _continue " > Converting"
+						noisily display in yellow _continue " > Converting to Stata format"
 						
 						if `skip'==0 {
 							if "`name'"!="" {
@@ -157,7 +157,7 @@ syntax anything, level(string) [convert replace remove name(string) ]
 					
 					// delete raw files (if specified)
 					if "`remove'" != "" {
-						noisily display in yellow _continue  " > Deleting raw" 
+						noisily display in yellow _continue  " > Deleting raw shapefiles" 
 						
 						if `skip'==0 {
 							foreach j in shp prj shx dbf {

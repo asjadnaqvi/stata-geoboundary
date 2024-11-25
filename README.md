@@ -9,8 +9,6 @@
 
 
 
-
-
 # geoboundary v1.0
 (25 Nov 2024)
 
@@ -134,7 +132,7 @@ geoboundary WLD, level(ADM0 ADM1) replace convert remove
 ```
 
 
-### Map
+### Plot the map
 
 Once the files are downloaded we can see if they are working.
 
@@ -147,12 +145,18 @@ use WLD_ADM0, clear
 spmap using WLD_ADM0_shp, id(_ID)
 ```
 
-
 <img src="/GIS/world_spmap.png" width="100%">
 
 For Stata 17 or higher, we can use the `geoplot` command:
 
 
+```stata
+geoframe create WLD_ADM0
+
+geoplot (line WLD_ADM0, lc(black)), tight
+```
+
+<img src="/GIS/world_geoplot.png" width="100%">
 
 
 ## Feedback
