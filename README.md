@@ -11,13 +11,15 @@
 # geoboundary v1.0
 (25 Nov 2024)
 
-A package for fetching country-level or global boundaries from the [geoBoundary](https://www.geoboundaries.org/) database. 
+A package for fetching country-level or global boundaries from the [geoBoundary](https://www.geoboundaries.org/) database.
 
 Please note that by using the data provided through this package, you are acknowledging the [disclaimer](#Disclaimer).
 
 All files are in the standard EPSG: 4326 (WGS84) projection.
 
-Note: GIS files are large and quickly accumulate. Please try and download exacly what you need. Please also avoid repeated downloading of the same datasets.
+The package uses globally standardized administration boundary classifications. They allows different systems to be combined together. Under this classification, `ADM0` is always the country boundary, while `ADM1` can represent provinces, districts, or other classifications depending on the country. For some countries data is available up to the 5th administrative depth or `ADM5`.
+
+Note that GIS files are large and quickly accumulate. Please try and download exacly what you need. Please also avoid repeated downloading of the same datasets.
 
 
 ## Installation
@@ -89,7 +91,7 @@ See `help geoboundary` for details.
 
 Please note that invalid `ISO3` names in a list of names will be skipped and will be highlighted in the command window. Check the geoBoundary website for the correct ISO3 code. Some ISO3 classifications do assign different codes to the same countries, e.g. for Germany both `DEU` (correct in geoboundary) and `GER` are used.
 
-For some countries, finer administrative boundaries are available upto the 5th level (ADM5). If you are specifying a list of countries with a large administrative boundary depth, e.g. `geoboundary PAK IND, level(ADM0 ADM1 ADM2 ADM4)`, the combination that does not exist will be skipped but highlighted in the output window.
+If you are specifying a list of countries with a finer administrative boundaries, e.g. `geoboundary PAK IND, level(ADM0 ADM1 ADM2 ADM4)`, the **ISO3-ADMx** combination that does not exist will be skipped but highlighted in the output window.
 
 
 ## Examples
