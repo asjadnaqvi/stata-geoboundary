@@ -63,7 +63,7 @@ Click here for the latest [SSC citation](XXXXXX).
 otherwise the following BibTeX citation can be used:
 
 ```BibTeX
-@software{sankey,
+@software{geoboundary,
    author = {Naqvi, Asjad},
    title = {Stata package ``geoboundary''},
    url = {https://github.com/asjadnaqvi/stata-geoboundary},
