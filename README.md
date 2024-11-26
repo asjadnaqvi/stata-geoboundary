@@ -159,6 +159,24 @@ geoplot (line WLD_ADM0, lc(black)), tight
 
 <img src="/GIS/world_geoplot.png" width="100%">
 
+### A nicer example
+
+If you have already downloaded global ADM0 and ADM1 boundaries, we can make a nicer map using the following code:
+
+```stata
+geoframe create WLD_ADM0
+geoframe create WLD_ADM1
+
+
+geoplot ///
+	(area WLD_ADM1, color(white) lc(red) lw(0.02))	///
+	(line WLD_ADM0, lc(gs3) lw(0.03))	///
+	, tight project(robinson) background(water) grid(lc(white) label)	///
+	title("Global ADM0 and ADM1 boundaries") ///
+	note("Source: https://www.geoboundaries.org/. Accessed using the #Stata #geoboundary package.", size(1.8))
+```
+
+<img src="/GIS/world_geoplot2.png" width="100%">
 
 ## Feedback
 
