@@ -5,7 +5,8 @@
 
 ---
 
-![geoboundary_banner](https://github.com/user-attachments/assets/f72a8caf-34e6-421e-bc0f-fd92e1ac8a09)
+![geoboundary_banner](https://github.com/user-attachments/assets/302797f0-ad99-40ca-81a3-bf3def8606c0)
+
 
 
 # geoboundary v1.0
