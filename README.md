@@ -182,7 +182,7 @@ geoplot ///
 
 ## Downloading, coverting, merging, and plotting
 
-Here is another example, where we download the DACH region countries - Austria, Switzerland, and Germany - for three admin levels, and merge them together:
+Here is another example, where we download the DACH counties - Austria, Switzerland, and Germany, for three admin levels, and merge them together using the `geoplot` package (Stata v17+ only):
 
 ```stata
 geoboundary DEU AUT CHE, level(ADM0 ADM1 ADM2) replace convert remove
