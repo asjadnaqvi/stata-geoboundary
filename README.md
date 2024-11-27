@@ -74,7 +74,7 @@ otherwise the following BibTeX citation can be used:
 
 
 
-The geoBoundary package [citation guidelines](https://www.geoboundaries.org/#tabs1-html) suggest the following citation:
+The geoBoundary website [citation guidelines](https://www.geoboundaries.org/#tabs1-html) suggests the following citation:
 
 
 Runfola, D. et al. (2020) geoBoundaries: A global database of political administrative boundaries. PLoS ONE 15(4): e0231866. https://doi.org/10.1371/journal.pone.0231866
