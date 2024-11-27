@@ -20,7 +20,9 @@ All files are in the standard EPSG: 4326 (WGS84) projection.
 
 The package uses globally standardized administration boundary classifications. They allows different systems to be combined together. Under this classification, `ADM0` is always the country boundary, while `ADM1` can represent provinces, districts, or other classifications depending on the country. For some countries data is available up to the 5th administrative depth or `ADM5`.
 
-Note that GIS files are large and quickly accumulate. Please try and download exacly what you need. Please also avoid repeated downloading of the same datasets.
+**Note 1**: GIS files are large and quickly accumulate. Please try and download exacly what you need. Please also avoid repeated downloading of the same datasets.
+
+**Note 2**: If you are bulk downloading multiple datasets in directories where disk writing is slower than the download speed, then you might get return or I/O errors even if the file is valid. This could potentially occur if downloading directly on to cloud storage (e.g. Dropbox, OneDrive, etc.), or using slower hard drives (e.g. 5400 rpm, non SATA etc.). In this case, either download the files somewhere else, or wait for the files to synchronize and try again.
 
 
 ## Installation
@@ -176,6 +178,45 @@ geoplot ///
 ```
 
 <img src="/GIS/world_geoplot2.png" width="100%">
+
+
+## Downloading, coverting, merging, and plotting
+
+Here is another example, where we download the DACH region countries - Austria, Switzerland, and Germany - for three admin levels, and merge them together:
+
+```stata
+geoboundary DEU AUT CHE, level(ADM0 ADM1 ADM2) replace convert remove
+
+geoframe create AUT_ADM0, replace
+geoframe create AUT_ADM1, replace
+geoframe create AUT_ADM2, replace
+
+geoframe create CHE_ADM0, replace
+geoframe create CHE_ADM1, replace
+geoframe create CHE_ADM2, replace
+
+geoframe create DEU_ADM0, replace
+geoframe create DEU_ADM1, replace
+geoframe create DEU_ADM2, replace
+
+
+geoframe stack AUT_ADM0 CHE_ADM0 DEU_ADM0, into(dach0) replace
+geoframe stack AUT_ADM1 CHE_ADM1 DEU_ADM1, into(dach1) replace
+geoframe stack AUT_ADM2 CHE_ADM2 DEU_ADM2, into(dach2) replace
+```
+
+and plot
+
+```stata
+geoplot ///
+	(area dach2 i._FRAME, lw(0.01) lc(white))	///
+	(line dach1 i._FRAME, lw(0.04) lc(white))	///
+	(line dach0 i._FRAME, lw(0.05) lc(black))	///
+	, tight project(peters) grid
+
+```
+
+<img src="/GIS/world_geoplot3.png" width="100%">
 
 ## Feedback
 
