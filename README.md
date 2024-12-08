@@ -9,10 +9,12 @@
 
 
 
-# geoboundary v1.0
-(25 Nov 2024)
+# geoboundary v1.1
+(08 Dec 2024)
 
-A package for fetching country-level or global adminstrative boundaries from the [geoBoundary](https://www.geoboundaries.org/) database.
+A package for fetching country-level or global adminstrative boundaries from the following databases:
+-    [geoBoundary](https://www.geoboundaries.org/) 
+-    [GADM](https://gadm.org/) v4.1
 
 Please note that by using the data provided through this package, you are acknowledging the [disclaimer](#Disclaimer).
 
@@ -35,7 +37,7 @@ The SSC version (**v1.0**):
 coming soon
 ```
 
-Or it can be installed from GitHub (**v1.0**):
+Or it can be installed from GitHub (**v1.1**):
 
 ```stata
 net install geoboundary, from("https://raw.githubusercontent.com/asjadnaqvi/stata-geoboundary/main/installation/") replace
@@ -76,25 +78,30 @@ otherwise the following BibTeX citation can be used:
 
 The geoBoundary website [citation guidelines](https://www.geoboundaries.org/#tabs1-html) suggests the following citation:
 
-
 Runfola, D. et al. (2020) geoBoundaries: A global database of political administrative boundaries. PLoS ONE 15(4): e0231866. https://doi.org/10.1371/journal.pone.0231866
+
+
+
 
 
 
 
 ## Syntax
 
-The syntax for the latest version is as follows:
+
+Syntax for meta data: 
+
+```stata
+geoboundary meta, [ country(list) iso(list) level(list) region(list) any(list) length(num) strict noseperator ]
+```
+
+Syntax for boundary data: 
 
 ```stata
 geoboundary ISO3 codes, level(string) [ convert name(str) replace remove ]
 ```
 
 See `help geoboundary` for details.
-
-Please note that invalid `ISO3` names in a list of names will be skipped and will be highlighted in the command window. Check the geoBoundary website for the correct ISO3 code. Some ISO3 classifications do assign different codes to the same countries, e.g. for Germany both `DEU` (correct in geoboundary) and `GER` are used.
-
-If you are specifying a list of countries with a finer administrative boundaries, e.g. `geoboundary PAK IND, level(ADM0 ADM1 ADM2 ADM4)`, the *ISO3-ADMx* combination that does not exist will be skipped but highlighted in the output window.
 
 
 ## Examples
@@ -105,7 +112,53 @@ Before starting, make sure you are in the correct directory where the maps files
 cd <mypath>
 ```
 
-### Download
+
+### Meta data
+
+The meta data syntax loads the geoboundary_meta.dta file from the [GIS](/gis) folder and parses it using fuzzy or exact regular expressions. If you would like the full overview, download the file directly from GitHub.
+
+Let's find a country with iso3 code DOM:
+
+``` stata
+geoboundary meta, iso(dom) length(20)				// search just iso3 codes
+geoboundary meta, any(dom) length(20)				// search any of the data columns
+geoboundary meta, any(dom) length(20) strict        // make the searches strict to exactly find the keyword DOM
+```
+
+The first expression return Dominican Republic, the correct iso3 country. The second expression does a fuzzy search and also returns Dominica (DMA), Dominican Republic (DOM), and United Kingdom (GBR). This is because `any()` searches all the columns and finds any possible match. We can also retrict it by specifying `strict` so that we ONLY find *DOM* in our searches.
+
+Another example is searching for the generic term *island*:
+
+
+```
+geoboundary meta, any(island) length(15) nosep
+geoboundary meta, any(island) length(15) strict nosep
+```
+
+The first expression returns any country with both `island` and `islands`, while the second one returns only countries that just have the name `island`. 
+
+
+Another example:
+
+```
+geoboundary meta, region(NA) length(15) 
+geoboundary meta, region(NA) length(15) strict
+```
+
+where the first expression with return World Bank region North America (NA) and Middle East and North Africa (MENA). So uses these searches carefully.
+
+Let's say we want to download a set of countries, e.g. in the ECA region, we can specify:
+
+```
+geoboundary meta, region(ECA) length(15) strict
+return list
+```
+
+where `return list` will show us two locals `r(geob)` and `r(gadm)` or the list of countries that can be downloaded from either databases. These lists can be passed onto the command below.
+
+
+
+### Boundary data
 
 Download the raw shapefiles in ESRI format:
 
@@ -218,6 +271,104 @@ geoplot ///
 
 <img src="/GIS/world_geoplot3.png" width="100%">
 
+
+### v1.1 examples:
+
+Let's download Mexico's boundaries from both geoBoundaries and GADM:
+
+```stata
+geoboundary mex, level(all) replace convert remove name(geob_mex)
+geoboundary mex, level(all) replace convert remove name(gadm_mex) source(gadm) 
+```
+
+and convert them to `geoframes`
+
+```stata
+geoframe create geob_mex_ADM0, replace
+geoframe create geob_mex_ADM1, replace
+geoframe create geob_mex_ADM2, replace
+
+geoframe create gadm_mex_ADM0, replace
+geoframe create gadm_mex_ADM1, replace
+geoframe create gadm_mex_ADM2, replace
+```
+
+and let's plot the two:
+
+```stata
+geoplot ///
+	(area geob_mex_ADM2, color(white) lc(red) lw(0.02))	///
+	(line geob_mex_ADM1, lc(blue) lw(0.04))	///
+	(line geob_mex_ADM0, lc(black) lw(0.1))	///
+	, tight title("Mexico from geoBoundaries")
+	
+geoplot ///
+	(area gadm_mex_ADM2, color(white) lc(red) lw(0.02))	///
+	(line gadm_mex_ADM1, lc(blue) lw(0.04))	///
+	(line gadm_mex_ADM0, lc(black) lw(0.1))	///
+	, tight  title("Mexico from GDAM")
+```
+
+<img src="/GIS/geoboundary_mex1.png" width="100%">
+
+<img src="/GIS/geoboundary_mex2.png" width="100%">
+
+The maps look fairly similar but this does not mean that both the datasets give us the exact boundaries. Let's try another example by using the Gambia:
+
+
+```stata
+geoboundary meta, any(GAM) length(15)	 // get the iso3 code
+
+
+geoboundary GMB, level(all) replace convert remove name(gadm_gmb) source(gadm) 
+geoboundary GMB, level(all) replace convert remove name(geob_gmb)	
+	
+	
+geoframe create geob_gmb_ADM0, replace
+geoframe create geob_gmb_ADM1, replace
+geoframe create geob_gmb_ADM2, replace
+
+geoframe create gadm_gmb_ADM0, replace
+geoframe create gadm_gmb_ADM1, replace
+geoframe create gadm_gmb_ADM2, replace
+```
+
+and plot:
+
+```
+geoplot ///
+	(area geob_gmb_ADM2, color(white) lc(red) lw(0.05))	///
+	(line geob_gmb_ADM1, lc(blue) lw(0.1))	///
+	(line geob_gmb_ADM0, lc(black) lw(0.2))	///
+	, tight title("The Gambia from geoBoundaries")
+	
+	
+geoplot ///
+	(area gadm_gmb_ADM2, color(white) lc(red) lw(0.05))	///
+	(line gadm_gmb_ADM1, lc(blue) lw(0.1))	///
+	(line gadm_gmb_ADM0, lc(black) lw(0.2))	///
+	, tight  title("The Gambia from GDAM")	
+```
+
+<img src="/GIS/geoboundary_gmb1.png" width="100%">
+
+<img src="/GIS/geoboundary_gmb2.png" width="100%">
+
+Both the maps look different. We can actually compare these by plotting the geoframes together:
+
+```stata
+geoplot ///
+	(line geob_gmb_ADM2, lc(red) lw(0.2) label("geoBoundaries"))	///
+	(line gadm_gmb_ADM2, lc(blue) lw(0.2) label("GADM"))	///
+	, tight title("The Gambia: Geoboundary vs GDAM") ///
+	glegend(layout(1 - 2) tsize(3.5))
+```
+
+<img src="/GIS/geoboundary_gmb3.png" width="100%">
+
+where we see that the GADM data is more coarse than the geoboundaries data. There could also be differences in the number of regions or boundaries available from the two datasets.
+
+
 ## Feedback
 
 Please open an [issue](https://github.com/asjadnaqvi/stata-geoboundary/issues) to report errors, feature enhancements, and/or other requests. 
@@ -238,6 +389,14 @@ By accessing or using the GIS data provided through this package, you acknowledg
 
 
 ## Change log
+
+**v1.1 (08 Dec 2024)**
+- Added `geoboundary meta` for meta information. Returns locals that can be used for bulk downloading.
+- GADM database added.
+- Added `source()` to allow downloading from different sources. Currently the default is geoBoundaries or `source(geoboundaries)`, while `source(gadm)` is currently the second option.
+- Lower cases are now allowed.
+- Various code optimizations.
+
 
 **v1.0 (25 Nov 2024)**
 - First release

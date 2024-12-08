@@ -1,14 +1,16 @@
 {smcl}
-{* 24Nov2024}{...}
+{* 08Dec2024}{...}
 {hi:help geoboundary}{...}
-{right:{browse "https://github.com/asjadnaqvi/stata-geoboundary":geoboundary v1.0 (GitHub)}}
+{right:{browse "https://github.com/asjadnaqvi/stata-geoboundary":geoboundary v1.1 (GitHub)}}
 
 {hline}
 
 {title:geoboundary}: 
 
-A Stata package for fetching boundary data from {browse "https://www.geoboundaries.org/":geoBoundaries} database.
-The database is provided by the {browse "William and Mary geoLab"} and is available under the CC BY 4.0 license. 
+A Stata package for fetching boundary data from:
+
+1. {browse "https://www.geoboundaries.org/":geoBoundaries} database.
+2. {browse "https://gadm.org/":GADM} database.
 
 All files are in the standard EPSG:4326 or {browse "https://en.wikipedia.org/wiki/World_Geodetic_System":WGS84} system.
 
@@ -16,22 +18,67 @@ By using the data provided through this package, you are agreeing to the disclai
 
 
 
-
-{marker syntax}{title:Syntax}
+{marker syntax1}{title:Syntax for meta data}
 
 {p 8 15 2}
-{cmd:geoboundary} {it:ISO3 list}, {cmd:level}(string) {cmd:[} {cmd:convert} {cmd:name}({it:str}) {cmd:replace} {cmd:remove} {cmd:]} 
+{cmd:geoboundary meta}, {cmd:[} {cmd:country}(list) {cmd:iso}(list) {cmd:level}(list) {cmd:region}(list) {cmd:any}(list) {cmd:length}(num) {cmd:strict} {cmdab:nosep:erator} {cmd:]} 
+
+(see {help geoboundary##meta:{it:meta options}})
+
+
+This is a helper function where users can recover the meta information by providing a set of search options. Multiple options can also be specified. 
+This command returns two r-class locals, {opt r(geob)} and {opt r(gadm)} for a list of iso countries that exist in the two databases. 
+These locals can be passed onto the function below for recovering boundary data. This is useful for pulling data for a set of regions.
+
+
+
+{marker syntax2}{title:Syntax for boundary data}
+
+{p 8 15 2}
+{cmd:geoboundary} {it:ISO3 list}, {cmd:level}(string) {cmd:[} {cmd:convert} {cmd:name}({it:str}) {cmd:source}({it:name}) {cmd:replace} {cmd:remove} {cmd:]} 
+
+(see {help geoboundary##boundary:{it:boundary options}})
+
+
 
 
 {synoptset 36 tabbed}{...}
-{synopthdr}
+{marker meta}{synopthdr:meta options}
 {synoptline}
 
-{p2coldent : {opt geoboundary} ISO3}Define a single or a list of 3-letter ISO3 codes. The codes must be specified in capital letters. Note that if the code is not valid, 
-then the country will be skipped and an error will be displayed. For the world map, the correct ISO3 code is {ul:WLD}.{p_end}
+{p2coldent : {opt country(string)}}Search by country names. Currently a list of names with spaces is not possible (forthcoming).{p_end}
+
+{p2coldent : {opt iso(string)}}Search by iso3 names.{p_end}
+
+{p2coldent : {opt region(string)}}Search by region names. Correct options are World Bank region classifications, e.g. LAC for Latin America and the Carribbean.{p_end}
+
+{p2coldent : {opt any(string)}}Search for the given expression in any of the raw meta data columns.{p_end}
+
+{p2coldent : {opt strict}}Make the searches strictly limited to the expression specified. E.g. {opt region(NA)} will return both NA (North America) and MENA (Middle East and North Africa).
+But if {opt strict} is specified only NA region countries will be returned.{p_end}
+
+{p2coldent : {opt level(string)}}Search by ADM levels. Options that will return results are ADM0, ADM1, ADM2, ADM3, ADM4, ADM5.{p_end}
+
+{p2coldent : {opt length(numeric)}}Limit the length of the table columns displayed after running the command. Might be useful if tables are spanning across multiple rows
+and are misaligned. This can occur with long names. Default is {opt length(30)}.{p_end}
+
+{p2coldent : {opt nosep:erator}}Do not add a separator line in the displayed table. Default separators are determined by ISO3s.{p_end}
+
+
+
+{synoptset 36 tabbed}{...}
+{marker boundary}{synopthdr:boundary options}
+{synoptline}
+
+{p2coldent : {opt geoboundary} ISO3}Define a single or a list of 3-letter ISO3 codes. Note that if the code is not valid, the country will be skipped and an error will be displayed. The use of
+{cmd geoboundary meta} is highly recommended to check for the correct ISO3 codes. For the world map, the correct ISO3 code is {ul:WLD}.{p_end}
 
 {p2coldent : {opt level(string)}}Valid options are ADM0, ADM1, ADM2, ADM3, ADM4, ADM5, or ALL. A list can also be specified. If all is specified, then the command will try and download all the six levels.
 If any level is not found, it will be skipped and an error message will be displayed. Note that finer levels, e.g. ADM4 or ADM5 have large file sizes so use carefully.{p_end}
+
+{p2coldent : {opt source(name)}}Options are {opt source(geoboundary} (default if nothing specified) or {opt source(gadm)}. Both datasets can contain different boundary data and even
+different availability of ADM levels. Note that geoBoundaries is more recent than GADM but please check before using. Another note of caution: GADM is downloaded as a zip file 
+containing all the ADM levels for each ISO3. This implies (a) all other options are overwritten, and (b) folder size can increases substantially. Other data sources will be added soon (forthcoming).{p_end}
 
 {p2coldent : {opt replace}}Replace the raw files if they exist.{p_end}
 
@@ -57,8 +104,8 @@ See {browse "https://github.com/asjadnaqvi/stata-geoboundary":GitHub} for exampl
 
 {title:Package details}
 
-Version      : {bf:geoboundary} v1.0
-This release : 25 Nov 2024
+Version      : {bf:geoboundary} v1.1
+This release : 08 Dec 2024
 First release: 25 Nov 2024
 Repository   : {browse "https://github.com/asjadnaqvi/stata-geoboundary":GitHub}
 Keywords     : Stata, maps, boundaries
@@ -93,20 +140,22 @@ By accessing or using the GIS data provided through this package, you acknowledg
 
 Suggested citation for this package:
 
-Naqvi, A. (2024). Stata package "geoboundary" version 1.0.
+Naqvi, A. (2024). Stata package "geoboundary" version 1.1.
 Release date 24 November 2024. https://github.com/asjadnaqvi/stata-geoboundary.
 
 @software{geoboundary,
    author = {Naqvi, Asjad},
    title = {Stata package ``geoboundary''},
    url = {https://github.com/asjadnaqvi/stata-geoboundary},
-   version = {1.0},
-   date = {2024-11-24}
+   version = {1.1},
+   date = {2024-12-08}
 }
 
 
 
 {title:References}
+
+{it: for geoBoundaries:}
 
 Runfola, D. et al. (2020) geoBoundaries: A global database of political administrative boundaries. PLoS ONE 15(4): e0231866. {browse "https://doi.org/10.1371/journal.pone.0231866"}.
 
