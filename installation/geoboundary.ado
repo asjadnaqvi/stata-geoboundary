@@ -1,15 +1,11 @@
-*! geoboundary v1.1 (08 Dec 2024)
+*! geoboundary v1.2 (09 Jan 2025)
 *! Asjad Naqvi (asjadnaqvi@gmail.com)
 
+* v1.2 (09 Jan 2025): passthrough of from and to ID codes, and values. Direct convertion to geoframe. WorldBank official layer added. Several fixes.
 * v1.1 (08 Dec 2024): Added geoboundaries meta data. Added GDAM as an additional source. Added source(). Lower cases are now allowed. Added meta data.
 * v1.0 (23 Nov 2024): First release
 
 
-/*
-Data source: 
-GeoBoundaries: https://www.geoboundaries.org/, https://github.com/wmgeolab/geoBoundaries/
-GADM: 
-*/
 
 /*
 
@@ -37,7 +33,7 @@ cap prog drop geoboundary
 program define geoboundary, rclass 
 version 15
 	
-syntax anything,  [level(string) convert replace remove name(string) source(string) country(string) iso(string) NOSEParator region(string) length(string) any(string) strict ]
+syntax anything, [level(string) convert replace remove name(string) source(string) country(string) iso(string) NOSEParator region(string) length(string) any(string) strict geoframe ]
 	
 	
 	if "`anything'" == "WLD" | "`anything'"=="wld" {
@@ -65,13 +61,13 @@ syntax anything,  [level(string) convert replace remove name(string) source(stri
 	
 	if "`anything'" != "meta" {
 		if "`source'" != ""  {
-			if !inlist("`source'", "geoboundaries", "gadm") {
+			if !inlist("`source'", "geoboundaries", "geob", "gadm", "worldbank") {
 				di as error "Correct {bf:source()} options are {ul:geoboundaries} or {ul:gadm}."
 			}
 		}
 		else {
 			local source geoboundaries
-			di in green "Option {bf:source()} not specified. Assuming {bf:geoboundaries} as the default."
+			di in green _newline "Option {bf:source()} not specified. Assuming {bf:geoboundaries} as the default."
 		}
 	}
 	
@@ -122,7 +118,7 @@ syntax anything,  [level(string) convert replace remove name(string) source(stri
 	
 	quietly {
 		
-		if "`source'" == "" | "`source'" == "geoboundaries" & "`anything'"!="meta" {
+		if "`source'" == "" | "`source'" == "geoboundaries" | "`source'" == "geob" & "`anything'"!="meta" {
 		
 			foreach x of local anything {
 			
@@ -166,39 +162,64 @@ syntax anything,  [level(string) convert replace remove name(string) source(stri
 						// convert (if specified)
 						if "`convert'" != "" {
 							
-							noisily display in yellow _continue " > Converting to Stata format"
 							
 							if `skip'==0 {
 								if "`name'"!="" {
 									spshape2dta `x1'_`lvl', replace saving(`name'_`lvl')
+									noisily display in yellow _continue " > {bf:`name'_`lvl'.dta}, {bf:`name'_`lvl'_shp.dta} saved"
+									
+									if "`geoframe'" != "" {
+										geoframe create `name'_`lvl', `replace'
+										noisily display in yellow _continue " > geoframe {bf:`name'_`lvl'} created"
+									}
 								}
 								else {
 									spshape2dta `x1'_`lvl', replace
+									noisily display in yellow _continue " > {bf:`x1'_`lvl'.dta}, {bf:`x1'_`lvl'_shp.dta} saved"
+									
+									if "`geoframe'" != "" {
+										geoframe create `x1'_`lvl', `replace'
+										noisily display in yellow _continue " > geoframe {bf:`x1'_`lvl'} created"
+									}
 								}
 							}
 							else {
 								if "`name'"!="" {					
-									spshape2dta geoBoundariesCGAZ_`lvl', replace saving(`name'`lvl')
+									spshape2dta geoBoundariesCGAZ_`lvl', replace saving(`name'_`lvl')
+									noisily display in yellow _continue " > {bf:`name'_`lvl'.dta}, {bf:`name'_`lvl'_shp.dta} saved"
+									
+									if "`geoframe'" != "" {
+										geoframe create `name'_`lvl', `replace'
+										noisily display in yellow _continue " > geoframe {bf:`name'_`lvl'} created"
+									}
+									
 								}
 								else {
 									spshape2dta geoBoundariesCGAZ_`lvl', replace saving(WLD_`lvl')
+									noisily display in yellow _continue " > {bf:WLD_`lvl'.dta}, {bf:WLD_`lvl'_shp.dta} saved"
+									
+									if "`geoframe'" != "" {
+										geoframe create WLD_`lvl', `replace'
+										noisily display in yellow _continue " > geoframe {bf:WLD_`lvl'} created"
+									}
+									
 								}
 							}
 						}
 						
 						// delete raw files (if specified)
 						if "`remove'" != "" {
-							noisily display in yellow _continue  " > Deleting raw shapefiles" 
+							noisily display in yellow _continue  " > shapefiles deleted" 
 							
 							if `skip'==0 {
 								foreach j in shp prj shx dbf {
-									capture erase 	"`x1'_`lvl'.`j'" // windows
+									capture erase 	"`x1'_`lvl'.`j'" 	// Windows
 									capture rm 		"`x1'_`lvl'.`j'"	// MAC
 								}
 							}
 							else {
 								foreach j in shp prj shx dbf {
-									capture erase 	"geoBoundariesCGAZ_`lvl'.`j'"  // windows
+									capture erase 	"geoBoundariesCGAZ_`lvl'.`j'"  // Windows
 									capture rm 		"geoBoundariesCGAZ_`lvl'.`j'"  // MAC
 								
 								
@@ -207,6 +228,9 @@ syntax anything,  [level(string) convert replace remove name(string) source(stri
 						}
 					}
 				}
+				
+				noisily display in yellow _continue  " > Done." 
+				
 			}
 		}
 		
@@ -262,6 +286,51 @@ syntax anything,  [level(string) convert replace remove name(string) source(stri
 				}
 			}
 		}
+		
+		
+		if "`source'"=="worldbank" {
+			
+			noisily display in yellow _newline "WB_ADM0: Fetching" _continue
+			
+			foreach j in shp prj shx dbf {
+				capture copy "https://github.com/asjadnaqvi/stata-geoboundary/raw/refs/heads/main/meta/WB_countries_Admin0_10m.`j'" "WB_ADM0.`j'", `rep'
+			}
+			
+
+			if "`convert'" != "" {
+
+				if "`name'"!="" {
+					spshape2dta WB_ADM0, replace saving(`name'_ADM0)
+					noisily display in yellow _continue " > {bf:`name'_ADM0.dta}, {bf:`name'_ADM0_shp.dta} saved"
+
+					if "`geoframe'" != "" {
+						geoframe create `name'_ADM0, `replace'
+						noisily display in yellow _continue " > geoframe {bf:`name'_ADM0} created"
+					}
+				}
+				else {
+					spshape2dta WB_ADM0, replace
+					noisily display in yellow _continue " > {bf:WB_ADM0.dta}, {bf:WB_ADM0_shp.dta} saved"
+
+					if "`geoframe'" != "" {
+						geoframe create WB_ADM0, `replace'
+						noisily display in yellow _continue " > geoframe {bf:WB_ADM0} created"
+					}
+				}
+			}
+			
+			// delete raw files (if specified)
+			if "`remove'" != "" {
+				noisily display in yellow _continue  " > Deleting raw shapefiles" 
+
+				foreach j in shp prj shx dbf cpg {
+					capture erase 	"WB_countries_Admin0_10m.`j'"  // windows
+					capture rm 		"WB_countries_Admin0_10m.`j'"  // MAC
+				}									
+			}	
+			
+		}
+		
 	}
 	
 end
@@ -274,7 +343,7 @@ program define _geometa, rclass
 	preserve
 	quietly {
 	
-		use "https://github.com/asjadnaqvi/stata-geoboundary/raw/refs/heads/main/GIS/geoboundary_meta.dta", clear
+		use "https://github.com/asjadnaqvi/stata-geoboundary/raw/refs/heads/main/meta/geoboundary_meta.dta", clear
 		*use geoboundary_meta, clear  // add GitHub link
 
 		foreach x of varlist _all { 

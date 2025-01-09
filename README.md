@@ -9,12 +9,13 @@
 
 
 
-# geoboundary v1.1
-(08 Dec 2024)
+# geoboundary v1.2
+(09 Jan 2025)
 
 A package for fetching country-level or global adminstrative boundaries from the following databases:
 -    [geoBoundary](https://www.geoboundaries.org/) 
 -    [GADM](https://gadm.org/) v4.1
+-    [World Bank](https://datacatalog.worldbank.org/search/dataset/0038272/World-Bank-Official-Boundaries) official ADM0 layer version 3.
 
 Please note that by using the data provided through this package, you are acknowledging the [disclaimer](#Disclaimer).
 
@@ -37,14 +38,14 @@ The SSC version (**v1.1**):
 ssc install geoboundary, replace
 ```
 
-Or it can be installed from GitHub (**v1.1**):
+Or it can be installed from GitHub (**v1.2**):
 
 ```stata
 net install geoboundary, from("https://raw.githubusercontent.com/asjadnaqvi/stata-geoboundary/main/installation/") replace
 ```
 
 
-Additional code for the figures shown below:
+Additional code for the maps shown below:
 
 
 ```stata
@@ -59,7 +60,7 @@ graph set window fontface "Arial Narrow"
 Software packages take countless hours of programming, testing, and bug fixing. If you use this package, then a citation would be highly appreciated:
 
 
-Click here for the latest [SSC citation](XXXXXX).
+Click here for the latest [SSC citation](https://ideas.repec.org/c/boc/bocode/s459399.html).
 
 
 otherwise the following BibTeX citation can be used:
@@ -69,19 +70,15 @@ otherwise the following BibTeX citation can be used:
    author = {Naqvi, Asjad},
    title = {Stata package ``geoboundary''},
    url = {https://github.com/asjadnaqvi/stata-geoboundary},
-   version = {1.0},
-   date = {2024-11-25}
+   version = {1.2},
+   date = {2025-01-09}
 }
 ```
-
 
 
 The geoBoundary website [citation guidelines](https://www.geoboundaries.org/#tabs1-html) suggests the following citation:
 
 Runfola, D. et al. (2020) geoBoundaries: A global database of political administrative boundaries. PLoS ONE 15(4): e0231866. https://doi.org/10.1371/journal.pone.0231866
-
-
-
 
 
 
@@ -369,6 +366,29 @@ geoplot ///
 where we see that the GADM data is more coarse than the geoboundaries data. There could also be differences in the number of regions or boundaries available from the two datasets.
 
 
+### World Bank's map layer
+
+Download the layer using this standard code:
+
+```stata
+geoboundary WLD, replace convert remove source(worldbank) geoframe
+```
+
+and test it out:
+
+```stata
+geoplot ///
+	(area WB_ADM0 i.REGION_WB, lc(white) lw(0.1) ) ///
+	, ///
+	tight ///
+	project(robinson) background(water) grid(lc(white) label)	///
+	legend(pos(7)) ///
+	title("WORLD BANK's ADM0 boundaries") ///
+	note("Source: https://datacatalog.worldbank.org/search/dataset/0038272/World-Bank-Official-Boundaries.", size(2))
+```
+
+<img src="/GIS/wb_adm0.png" width="100%">
+
 ## Feedback
 
 Please open an [issue](https://github.com/asjadnaqvi/stata-geoboundary/issues) to report errors, feature enhancements, and/or other requests. 
@@ -386,9 +406,14 @@ By accessing or using the GIS data provided through this package, you acknowledg
 
 
 
-
-
 ## Change log
+
+**v1.2 (09 Jan 2025)**
+- New option `geoframe` added to directly convert to geoplot frames.
+- World Bank's official ADM0 layer added to `source()`. See example above.
+- Improvements to code and better notes on ongoing background processes.
+- Better checks to avoid random program crashes.
+- Several bug fixes.
 
 **v1.1 (08 Dec 2024)**
 - Added `geoboundary meta` for meta information. Returns locals that can be used for bulk downloading.
