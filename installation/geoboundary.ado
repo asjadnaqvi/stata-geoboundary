@@ -1,11 +1,16 @@
 *! geoboundary v1.2 (09 Jan 2025)
 *! Asjad Naqvi (asjadnaqvi@gmail.com)
 
-* v1.2 (09 Jan 2025): passthrough of from and to ID codes, and values. Direct convertion to geoframe. WorldBank official layer added. Several fixes.
+* v1.2 (09 Jan 2025): Direct convertion to geoframe. WorldBank official layer added. Several fixes.
 * v1.1 (08 Dec 2024): Added geoboundaries meta data. Added GDAM as an additional source. Added source(). Lower cases are now allowed. Added meta data.
 * v1.0 (23 Nov 2024): First release
 
 
+/*
+Data source: 
+GeoBoundaries: https://www.geoboundaries.org/, https://github.com/wmgeolab/geoBoundaries/
+GADM: 
+*/
 
 /*
 
