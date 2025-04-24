@@ -13,7 +13,7 @@
 (09 Jan 2025)
 
 A package for fetching country-level or global adminstrative boundaries from the following databases:
--    [geoBoundary](https://www.geoboundaries.org/) 
+-    [geoBoundaries](https://www.geoboundaries.org/) 
 -    [GADM](https://gadm.org/) v4.1
 -    [World Bank](https://datacatalog.worldbank.org/search/dataset/0038272/World-Bank-Official-Boundaries) official ADM0 layer version 3.
 
