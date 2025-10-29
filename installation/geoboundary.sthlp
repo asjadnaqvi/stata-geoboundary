@@ -1,7 +1,7 @@
 {smcl}
-{* 09Jan2025}{...}
+{* 29Oct2025}{...}
 {hi:help geoboundary}{...}
-{right:{browse "https://github.com/asjadnaqvi/stata-geoboundary":geoboundary v1.2 (GitHub)}}
+{right:{browse "https://github.com/asjadnaqvi/stata-geoboundary":geoboundary v1.21 (GitHub)}}
 
 {hline}
 
@@ -109,8 +109,8 @@ See {browse "https://github.com/asjadnaqvi/stata-geoboundary":GitHub} for exampl
 
 {title:Package details}
 
-Version      : {bf:geoboundary} v1.2
-This release : 09 Jan 2025
+Version      : {bf:geoboundary} v1.21
+This release : 29 Oct 2025
 First release: 25 Nov 2024
 Repository   : {browse "https://github.com/asjadnaqvi/stata-geoboundary":GitHub}
 Keywords     : Stata, maps, boundaries
@@ -158,7 +158,8 @@ Runfola, D. et al. (2020) geoBoundaries: A global database of political administ
 {title:Other visualization packages}
 
 {psee}
-    {helpb arcplot}, {helpb alluvial}, {helpb bimap}, {helpb bumparea}, {helpb bumpline}, {helpb circlebar}, {helpb circlepack}, {helpb clipgeo}, {helpb delaunay}, {helpb graphfunctions}, {helpb geoboundary}, {helpb geoflow}, {helpb joyplot}, 
-	{helpb marimekko}, {helpb polarspike}, {helpb sankey}, {helpb schemepack}, {helpb spider}, {helpb splinefit}, {helpb streamplot}, {helpb sunburst}, {helpb ternary}, {helpb treecluster}, {helpb treemap}, {helpb trimap}, {helpb waffle}
+    {helpb arcplot}, {helpb alluvial}, {helpb bimap}, {helpb bumparea}, {helpb bumpline}, {helpb circlebar}, {helpb circlepack}, {helpb clipgeo}, {helpb delaunay}, {helpb graphfunctions},
+	{helpb geoboundary}, {helpb geoflow}, {helpb joyplot}, {helpb marimekko}, {helpb polarspike}, {helpb sankey}, {helpb schemepack}, {helpb spider}, {helpb splinefit}, {helpb streamplot}, 
+	{helpb sunburst}, {helpb ternary}, {helpb tidytuesday}, {helpb treecluster}, {helpb treemap}, {helpb trimap}, {helpb waffle}
 
-Visit {browse "https://github.com/asjadnaqvi":GitHub} for further information.
+Visit {browse "https://github.com/asjadnaqvi":GitHub} for more information.

@@ -1,9 +1,10 @@
-*! geoboundary v1.2 (09 Jan 2025)
+*! geoboundary v1.21 (29 Oct 2025)
 *! Asjad Naqvi (asjadnaqvi@gmail.com)
 
-* v1.2 (09 Jan 2025): Direct convertion to geoframe. WorldBank official layer added. Several fixes.
-* v1.1 (08 Dec 2024): Added geoboundaries meta data. Added GDAM as an additional source. Added source(). Lower cases are now allowed. Added meta data.
-* v1.0 (23 Nov 2024): First release
+* v1.21 (29 Oct 2025): meta now displays all the data is options are missing.
+* v1.2  (09 Jan 2025): Direct convertion to geoframe. WorldBank official layer added. Several fixes.
+* v1.1  (08 Dec 2024): Added geoboundaries meta data. Added GDAM as an additional source. Added source(). Lower cases are now allowed. Added meta data.
+* v1.0  (23 Nov 2024): First release
 
 
 /*
@@ -234,7 +235,7 @@ syntax anything, [level(string) convert replace remove name(string) source(strin
 					}
 				}
 				
-				noisily display in yellow _continue  " > Done." 
+				*noisily display in yellow _continue  " > Done." 
 				
 			}
 		}
@@ -408,6 +409,11 @@ program define _geometa, rclass
 		}
 		
 		
+		// display everything is specifics are missing.
+		if "`iso'"=="" & "`country'"=="" & "`region'"=="" & "`level'"=="" & "`any'"=="" {
+			replace _markme=1
+		}
+		
 		
 		if "`noseparator'" == "" {
 			local mysep sepby(iso3) 
@@ -418,7 +424,7 @@ program define _geometa, rclass
 		
 
 		sort name iso3 adm
-		noisily list name iso3 adm* geob_year continent un_region wb_region wb_regioncode if _markme==1, string(`length') header table noobs subvarname `mysep'
+		noisily list name iso3 adm adm_geob geob_year adm_gadm continent un_region wb_region wb_regioncode if _markme==1, string(`length') header table noobs subvarname `mysep'
 
 		quietly levelsof iso3 if _markme==1 & !missing(adm_gadm), clean local(iso3_gadm)
 		quietly levelsof iso3 if _markme==1 & !missing(adm_geob), clean local(iso3_geob)
