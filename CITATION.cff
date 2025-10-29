@@ -3,6 +3,6 @@ authors:
 - family-names: "Naqvi"
   given-names: "Asjad"
 title: "Stata package ``geoboundary''"
-version: 1.2
-date-released: 2025-01-09
+version: 1.21
+date-released: 2025-10-29
 url: "https://github.com/asjadnaqvi/stata-geoboundary"

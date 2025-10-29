@@ -9,8 +9,8 @@
 
 
 
-# geoboundary v1.2
-(09 Jan 2025)
+# geoboundary v1.21
+(29 Oct 2025)
 
 A package for fetching country-level or global adminstrative boundaries from the following databases:
 -    [geoBoundaries](https://www.geoboundaries.org/) 
@@ -38,7 +38,7 @@ The SSC version (**v1.2**):
 ssc install geoboundary, replace
 ```
 
-Or it can be installed from GitHub (**v1.2**):
+Or it can be installed from GitHub (**v1.21**):
 
 ```stata
 net install geoboundary, from("https://raw.githubusercontent.com/asjadnaqvi/stata-geoboundary/main/installation/") replace
@@ -61,25 +61,6 @@ Software packages take countless hours of programming, testing, and bug fixing. 
 
 
 Click here for the latest [SSC citation](https://ideas.repec.org/c/boc/bocode/s459399.html).
-
-
-otherwise the following BibTeX citation can be used:
-
-```BibTeX
-@software{geoboundary,
-   author = {Naqvi, Asjad},
-   title = {Stata package ``geoboundary''},
-   url = {https://github.com/asjadnaqvi/stata-geoboundary},
-   version = {1.2},
-   date = {2025-01-09}
-}
-```
-
-
-The geoBoundary website [citation guidelines](https://www.geoboundaries.org/#tabs1-html) suggests the following citation:
-
-Runfola, D. et al. (2020) geoBoundaries: A global database of political administrative boundaries. PLoS ONE 15(4): e0231866. https://doi.org/10.1371/journal.pone.0231866
-
 
 
 
@@ -112,9 +93,12 @@ cd <mypath>
 
 ### Meta data
 
-The meta data syntax loads the geoboundary_meta.dta file from the [GIS](/gis) folder and parses it using fuzzy or exact regular expressions. If you would like the full overview, download the file directly from GitHub.
+The meta data syntax loads the **geoboundary_meta.dta** file from the [GIS](/gis) folder and parses it using fuzzy or exact regular expressions. If you would like the full overview, download the file directly from GitHub.
 
-Let's find a country with iso3 code DOM:
+The if nothing is specified, then `geoboundary meta` will list all the countries in the database. This might be useful to get the ISO3 codes or check which countries are available.
+
+
+Let's find a country with ISO3 code DOM:
 
 ``` stata
 geoboundary meta, iso(dom) length(20)				// search just iso3 codes
@@ -407,6 +391,11 @@ By accessing or using the GIS data provided through this package, you acknowledg
 
 
 ## Change log
+
+**v1.21 (29 Oct 2025)**
+- `geoboundary meta` now lists all the countries on the screen.
+- Updates and corrections to the meta file.
+- Minor code improvements.
 
 **v1.2 (09 Jan 2025)**
 - New option `geoframe` added to directly convert to geoplot frames.
