@@ -9,13 +9,13 @@
 
 
 
-# geoboundary v1.21
-(29 Oct 2025)
+# geoboundary v1.22
+(02 Nov 2025)
 
 A package for fetching country-level or global adminstrative boundaries from the following databases:
 -    [geoBoundaries](https://www.geoboundaries.org/) 
 -    [GADM](https://gadm.org/) v4.1
--    [World Bank](https://datacatalog.worldbank.org/search/dataset/0038272/World-Bank-Official-Boundaries) official ADM0 layer version 3.
+-    [World Bank](https://datacatalog.worldbank.org/search/dataset/0038272/World-Bank-Official-Boundaries) official ADM0-ADM2 layers release 5 (September 2025).
 
 Please note that by using the data provided through this package, you are acknowledging the [disclaimer](#Disclaimer).
 
@@ -38,7 +38,7 @@ The SSC version (**v1.2**):
 ssc install geoboundary, replace
 ```
 
-Or it can be installed from GitHub (**v1.21**):
+Or it can be installed from GitHub (**v1.22**):
 
 ```stata
 net install geoboundary, from("https://raw.githubusercontent.com/asjadnaqvi/stata-geoboundary/main/installation/") replace
@@ -355,8 +355,17 @@ where we see that the GADM data is more coarse than the geoboundaries data. Ther
 Download the layer using this standard code:
 
 ```stata
-geoboundary WLD, replace convert remove source(worldbank) geoframe
+geoboundary WLD, level(ADM0 ADM1 ADM2) replace convert remove source(worldbank) geoframe
 ```
+
+If you have already downloaded the files, then just covert them directly in geoframe rather downloading them again using the above command:
+
+```stata
+geoframe create WB_ADM0, replace
+geoframe create WB_ADM1, replace
+geoframe create WB_ADM2, replace
+```
+
 
 and test it out:
 
@@ -391,6 +400,11 @@ By accessing or using the GIS data provided through this package, you acknowledg
 
 
 ## Change log
+
+**v1.22 (02 Nov 2025)**
+- Updated the World Bank layers to the latest release 5 which now includes ADM0-ADM2 boundaries. This can now be merged with other WB datasets that provide sub-regional data.
+- Some large files are now hosted on [Hugging Face](https://huggingface.co/datasets/asjadnaqvi/shapefiles) for stable URLs. It is also better than GIT LFS for various reasons. In case your organization does not allow access to Hugging Face, then directly download the files and manually convert them to shapefiles and geoframes.
+- Minor improvements to the code.
 
 **v1.21 (29 Oct 2025)**
 - `geoboundary meta` now lists all the countries on the screen.

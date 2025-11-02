@@ -1,6 +1,7 @@
-*! geoboundary v1.21 (29 Oct 2025)
+*! geoboundary v1.22 (02 Nov 2025)
 *! Asjad Naqvi (asjadnaqvi@gmail.com)
 
+* v1.22 (02 Nov 2025): Update to World Bank release 5 which now has ADM0-ADM2 boundaries.
 * v1.21 (29 Oct 2025): meta now displays all the data is options are missing.
 * v1.2  (09 Jan 2025): Direct convertion to geoframe. WorldBank official layer added. Several fixes.
 * v1.1  (08 Dec 2024): Added geoboundaries meta data. Added GDAM as an additional source. Added source(). Lower cases are now allowed. Added meta data.
@@ -11,6 +12,7 @@
 Data source: 
 GeoBoundaries: https://www.geoboundaries.org/, https://github.com/wmgeolab/geoBoundaries/
 GADM: 
+World Bank: https://datacatalog.worldbank.org/search/dataset/0038272/World-Bank-Official-Administrative-Boundaries
 */
 
 /*
@@ -112,7 +114,7 @@ syntax anything, [level(string) convert replace remove name(string) source(strin
 		if `errcount' > 0 exit
 	}
 	
-	if "`level'" == "ALL" | "`level'"=="all" {
+	if "`level'" == "ALL" | "`level'" == "all" {
 		local level ADM0 ADM1 ADM2 ADM3 ADM4 ADM5
 		local length1 : word count `level'
 	}
@@ -294,49 +296,79 @@ syntax anything, [level(string) convert replace remove name(string) source(strin
 		}
 		
 		
-		if "`source'"=="worldbank" {
-			
-			noisily display in yellow _newline "WB_ADM0: Fetching" _continue
-			
-			foreach j in shp prj shx dbf {
-				capture copy "https://github.com/asjadnaqvi/stata-geoboundary/raw/refs/heads/main/meta/WB_countries_Admin0_10m.`j'" "WB_ADM0.`j'", `rep'
-			}
-			
-
-			if "`convert'" != "" {
-
-				if "`name'"!="" {
-					spshape2dta WB_ADM0, replace saving(`name'_ADM0)
-					noisily display in yellow _continue " > {bf:`name'_ADM0.dta}, {bf:`name'_ADM0_shp.dta} saved"
-
-					if "`geoframe'" != "" {
-						geoframe create `name'_ADM0, `replace'
-						noisily display in yellow _continue " > geoframe {bf:`name'_ADM0} created"
-					}
-				}
-				else {
-					spshape2dta WB_ADM0, replace
-					noisily display in yellow _continue " > {bf:WB_ADM0.dta}, {bf:WB_ADM0_shp.dta} saved"
-
-					if "`geoframe'" != "" {
-						geoframe create WB_ADM0, `replace'
-						noisily display in yellow _continue " > geoframe {bf:WB_ADM0} created"
-					}
-				}
-			}
-			
-			// delete raw files (if specified)
-			if "`remove'" != "" {
-				noisily display in yellow _continue  " > Deleting raw shapefiles" 
-
-				foreach j in shp prj shx dbf cpg {
-					capture erase 	"WB_countries_Admin0_10m.`j'"  // windows
-					capture rm 		"WB_countries_Admin0_10m.`j'"  // MAC
-				}									
-			}	
-			
-		}
+		// WORLD BANK // Updated to release 5
 		
+		if "`source'"=="worldbank" & "`anything'"!="meta"  {
+
+				forval i = 1/`length1' {
+					local lvl : word `i' of `level'
+					local lvl = upper("`lvl'")
+					
+					// fetch
+					noisily display in yellow _newline "World Bank `lvl' (release 5): Fetching" _continue
+					
+					local _check = 0
+					
+					if `skip' == 1 {
+						foreach j in shp prj shx dbf cpg {
+							*capture copy "`baseurl'/`x1'/`lvl'/geoBoundaries-`x1'-`lvl'.`j'" "`x1'_`lvl'.`j'", `rep'
+							
+							capture copy "https://huggingface.co/datasets/asjadnaqvi/shapefiles/resolve/main/WB_GAD_`lvl'.`j'" "WB_`lvl'.`j'", `rep'
+							
+							if _rc!= 0 {
+								local ++_check
+							}	
+						}
+					}
+
+					
+
+					if `_check' != 0 {
+						noisily display in red _continue " > Does not exist."
+					}
+					else {
+					
+						// convert (if specified)
+						if "`convert'" != "" {
+														
+							if `skip' == 1 {
+								if "`name'"!="" {
+									spshape2dta WB_`lvl', replace saving(`name'_`lvl')
+									noisily display in yellow _continue " > {bf:`name'_`lvl'.dta}, {bf:`name'_`lvl'_shp.dta} saved"
+									
+									if "`geoframe'" != "" {
+										geoframe create `name'_`lvl', `replace'
+										noisily display in yellow _continue " > geoframe {bf:`name'_`lvl'} created"
+									}
+								}
+								else {
+									spshape2dta WB_`lvl', replace
+									noisily display in yellow _continue " > {bf:WB_`lvl'.dta}, {bf:WB_`lvl'_shp.dta} saved"
+									
+									if "`geoframe'" != "" {
+										geoframe create WB_`lvl', `replace'
+										noisily display in yellow _continue " > geoframe {bf:WB_`lvl'} created"
+									}
+								}
+							}
+			
+						}
+						
+						// delete raw files (if specified)
+						if "`remove'" != "" {
+							noisily display in yellow _continue  " > shapefiles deleted" 
+							
+							if `skip' == 1 {
+								foreach j in shp prj shx dbf {
+									capture erase 	"WB_`lvl'.`j'" 	// Windows
+									capture rm 		"WB_`lvl'.`j'"	// MAC
+								}
+							}
+						}
+					}
+				}
+					
+		}		
 	}
 	
 end

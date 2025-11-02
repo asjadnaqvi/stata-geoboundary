@@ -1,7 +1,7 @@
 {smcl}
-{* 29Oct2025}{...}
+{* 02Nov2025}{...}
 {hi:help geoboundary}{...}
-{right:{browse "https://github.com/asjadnaqvi/stata-geoboundary":geoboundary v1.21 (GitHub)}}
+{right:{browse "https://github.com/asjadnaqvi/stata-geoboundary":geoboundary v1.22 (GitHub)}}
 
 {hline}
 
@@ -11,7 +11,7 @@ A Stata package for fetching boundary data from:
 
 1. {browse "https://www.geoboundaries.org/":geoBoundaries} (default).
 2. {browse "https://gadm.org/":GADM} v4.1
-3. {browse "https://datacatalog.worldbank.org/search/dataset/0038272/World-Bank-Official-Boundaries":World Bank} global ADM0 layer version 3.
+3. {browse "https://datacatalog.worldbank.org/search/dataset/0038272/World-Bank-Official-Boundaries":World Bank} global layers release 5 (Sep 2025).
 
 All files are in the standard EPSG:4326 or {browse "https://en.wikipedia.org/wiki/World_Geodetic_System":WGS84} system.
 
@@ -109,8 +109,8 @@ See {browse "https://github.com/asjadnaqvi/stata-geoboundary":GitHub} for exampl
 
 {title:Package details}
 
-Version      : {bf:geoboundary} v1.21
-This release : 29 Oct 2025
+Version      : {bf:geoboundary} v1.22
+This release : 02 Nov 2025
 First release: 25 Nov 2024
 Repository   : {browse "https://github.com/asjadnaqvi/stata-geoboundary":GitHub}
 Keywords     : Stata, maps, boundaries
