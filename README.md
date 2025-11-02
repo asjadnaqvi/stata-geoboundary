@@ -366,12 +366,13 @@ geoframe create WB_ADM1, replace
 geoframe create WB_ADM2, replace
 ```
 
+Remember that frames can checked using `frames dir` or one can also switch to an active frame to get the variables or merge datasets etc using `frame change <frame name>`.
 
-and test it out:
+Test out the data:
 
 ```stata
 geoplot ///
-	(area WB_ADM0 i.REGION_WB, lc(white) lw(0.1) ) ///
+	(area WB_ADM0 i.WB_REGION, lc(white) lw(0.1) ) ///
 	, ///
 	tight ///
 	project(robinson) background(water) grid(lc(white) label)	///
@@ -380,7 +381,28 @@ geoplot ///
 	note("Source: https://datacatalog.worldbank.org/search/dataset/0038272/World-Bank-Official-Boundaries.", size(2))
 ```
 
-<img src="/GIS/wb_adm0.png" width="100%">
+<img src="/GIS/wb_admin0.png" width="100%">
+
+
+Plot all the layers (warning, very large files!): 
+
+
+
+```stata
+geoplot ///
+	(line WB_ADM2, lc(red) lw(0.03) ) ///
+	(line WB_ADM1, lc(blue) lw(0.08) ) ///
+	(line WB_ADM0, lc(black) lw(0.2) ) ///
+	, ///
+	tight ///
+	legend(pos(7)) ///
+	title("World Bank ADM0, ADM1, ADM2 boundaries (release 5: Sep 2025)", size(6)) ///
+	note("Source: https://datacatalog.worldbank.org/search/dataset/0038272/world-bank-official-boundaries", size(2.5))
+```
+
+<img src="/GIS/wb_release5.png" width="100%">
+
+
 
 ## Feedback
 
