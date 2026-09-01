@@ -1,6 +1,7 @@
-*! geoboundary v1.22 (02 Nov 2025)
+*! geoboundary v1.23 (01 Sep 2026)
 *! Asjad Naqvi (asjadnaqvi@gmail.com)
 
+* v1.23 (01 Sep 2026): Refreshed World Bank release 5 shapefiles (Jul 2026 update).
 * v1.22 (02 Nov 2025): Update to World Bank release 5 which now has ADM0-ADM2 boundaries.
 * v1.21 (29 Oct 2025): meta now displays all the data is options are missing.
 * v1.2  (09 Jan 2025): Direct convertion to geoframe. WorldBank official layer added. Several fixes.
@@ -305,7 +306,7 @@ syntax anything, [level(string) convert replace remove name(string) source(strin
 					local lvl = upper("`lvl'")
 					
 					// fetch
-					noisily display in yellow _newline "World Bank `lvl' (release 5): Fetching" _continue
+					noisily display in yellow _newline "World Bank `lvl' (Jul 14, 2026): Fetching" _continue
 					
 					local _check = 0
 					

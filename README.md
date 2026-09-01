@@ -9,13 +9,13 @@
 
 
 
-# geoboundary v1.22
-(02 Nov 2025)
+# geoboundary v1.23
+(01 Sep 2026)
 
 A package for fetching country-level or global adminstrative boundaries from the following databases:
 -    [geoBoundaries](https://www.geoboundaries.org/) 
 -    [GADM](https://gadm.org/) v4.1
--    [World Bank](https://datacatalog.worldbank.org/search/dataset/0038272/World-Bank-Official-Boundaries) official ADM0-ADM2 layers release 5 (September 2025).
+-    [World Bank](https://datacatalog.worldbank.org/search/dataset/0038272/World-Bank-Official-Boundaries) official ADM0-ADM2 layers release 5 (July 2026 refresh).
 
 Please note that by using the data provided through this package, you are acknowledging the [disclaimer](#Disclaimer).
 
@@ -38,7 +38,7 @@ The SSC version (**v1.2**):
 ssc install geoboundary, replace
 ```
 
-Or it can be installed from GitHub (**v1.22**):
+Or it can be installed from GitHub (**v1.23**):
 
 ```stata
 net install geoboundary, from("https://raw.githubusercontent.com/asjadnaqvi/stata-geoboundary/main/installation/") replace
@@ -377,7 +377,7 @@ geoplot ///
 	tight ///
 	project(robinson) background(water) grid(lc(white) label)	///
 	legend(pos(7)) ///
-	title("WORLD BANK's ADM0 boundaries") ///
+	title("WORLD BANK's ADM0 boundaries (version: July 2026)") ///
 	note("Source: https://datacatalog.worldbank.org/search/dataset/0038272/World-Bank-Official-Boundaries.", size(2))
 ```
 
@@ -390,13 +390,13 @@ Plot all the layers (warning, very large files!):
 
 ```stata
 geoplot ///
-	(line WB_ADM2, lc(red) lw(0.03) ) ///
-	(line WB_ADM1, lc(blue) lw(0.08) ) ///
-	(line WB_ADM0, lc(black) lw(0.2) ) ///
+	(line WB_ADM2, lc(red) lw(0.02) ) ///
+	(line WB_ADM1, lc(blue) lw(0.05) ) ///
+	(line WB_ADM0, lc(black) lw(0.1) ) ///
 	, ///
 	tight ///
-	legend(pos(7)) ///
-	title("World Bank ADM0, ADM1, ADM2 boundaries (release 5: Sep 2025)", size(6)) ///
+	legend(pos(7))  ///
+	title("World Bank ADM0, ADM1, ADM2 boundaries (version: July 2026)", size(6)) ///
 	note("Source: https://datacatalog.worldbank.org/search/dataset/0038272/world-bank-official-boundaries", size(2.5))
 ```
 
@@ -422,6 +422,9 @@ By accessing or using the GIS data provided through this package, you acknowledg
 
 
 ## Change log
+
+**v1.23 (01 Sep 2026)**
+- Refreshed the World Bank ADM0-ADM2 shapefiles to match the World Bank's July 2026 data update.
 
 **v1.22 (02 Nov 2025)**
 - Updated the World Bank layers to the latest release 5 which now includes ADM0-ADM2 boundaries. This can now be merged with other WB datasets that provide sub-regional data.

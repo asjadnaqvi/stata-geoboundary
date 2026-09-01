@@ -1,7 +1,7 @@
 {smcl}
-{* 02Nov2025}{...}
+{* 01Sep2026}{...}
 {hi:help geoboundary}{...}
-{right:{browse "https://github.com/asjadnaqvi/stata-geoboundary":geoboundary v1.22 (GitHub)}}
+{right:{browse "https://github.com/asjadnaqvi/stata-geoboundary":geoboundary v1.23 (GitHub)}}
 
 {hline}
 
@@ -109,8 +109,8 @@ See {browse "https://github.com/asjadnaqvi/stata-geoboundary":GitHub} for exampl
 
 {title:Package details}
 
-Version      : {bf:geoboundary} v1.22
-This release : 02 Nov 2025
+Version      : {bf:geoboundary} v1.23
+This release : 01 Sep 2026
 First release: 25 Nov 2024
 Repository   : {browse "https://github.com/asjadnaqvi/stata-geoboundary":GitHub}
 Keywords     : Stata, maps, boundaries
