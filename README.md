@@ -1,5 +1,5 @@
 
-![StataMin](https://img.shields.io/badge/stata-2015-blue) ![issues](https://img.shields.io/github/issues/asjadnaqvi/stata-geoboundary) ![license](https://img.shields.io/github/license/asjadnaqvi/stata-geoboundary) ![Stars](https://img.shields.io/github/stars/asjadnaqvi/stata-geoboundary) ![version](https://img.shields.io/github/v/release/asjadnaqvi/stata-geoboundary) ![release](https://img.shields.io/github/release-date/asjadnaqvi/stata-geoboundary)
+![StataMin](https://img.shields.io/badge/stata-2021-blue) ![issues](https://img.shields.io/github/issues/asjadnaqvi/stata-geoboundary) ![license](https://img.shields.io/github/license/asjadnaqvi/stata-geoboundary) ![Stars](https://img.shields.io/github/stars/asjadnaqvi/stata-geoboundary) ![version](https://img.shields.io/github/v/release/asjadnaqvi/stata-geoboundary) ![release](https://img.shields.io/github/release-date/asjadnaqvi/stata-geoboundary)
 
 [Installation](#Installation) | [Syntax](#Syntax) | [Examples](#Examples) | [Feedback](#Feedback) | [Disclaimer](#Disclaimer)  | [Change log](#Change-log)
 
@@ -9,13 +9,14 @@
 
 
 
-# geoboundary v1.23
-(01 Sep 2026)
+# geoboundary v1.3
+(15 Oct 2026)
 
 A package for fetching country-level or global adminstrative boundaries from the following databases:
 -    [geoBoundaries](https://www.geoboundaries.org/) 
 -    [GADM](https://gadm.org/) v4.1
 -    [World Bank](https://datacatalog.worldbank.org/search/dataset/0038272/World-Bank-Official-Boundaries) official ADM0-ADM2 layers (July 2026 release).
+-    [Eurostat GISCO](https://gisco-services.ec.europa.eu/distribution/v2/nuts/) NUTS0-NUTS3 region polygons.
 
 Please note that by using the data provided through this package, you are acknowledging the [disclaimer](#Disclaimer).
 
@@ -38,7 +39,7 @@ The SSC version (**v1.2**):
 ssc install geoboundary, replace
 ```
 
-Or it can be installed from GitHub (**v1.23**):
+Or it can be installed from GitHub (**v1.3**):
 
 ```stata
 net install geoboundary, from("https://raw.githubusercontent.com/asjadnaqvi/stata-geoboundary/main/installation/") replace
@@ -76,7 +77,8 @@ geoboundary meta, [ country(list) iso(list) level(list) region(list) any(list) l
 Syntax for boundary data: 
 
 ```stata
-geoboundary ISO3 codes, level(string) [ convert name(str) replace remove ]
+geoboundary ISO3 codes, level(string) [ source(str) convert geoframe name(str) replace remove ]
+geoboundary EUR, source(eurostat) level(string) [ vintage(str) scale(str) convert geoframe name(str) replace remove ]
 ```
 
 See `help geoboundary` for details.
@@ -93,7 +95,7 @@ cd <mypath>
 
 ### Meta data
 
-The meta data syntax loads the **geoboundary_meta.dta** file from the [GIS](/gis) folder and parses it using fuzzy or exact regular expressions. If you would like the full overview, download the file directly from GitHub.
+The meta data syntax loads the **geoboundary_meta.dta** file from the [GIS](/gis) folder and parses it depending on the query. If you would like the full overview, download the file directly from GitHub.
 
 The if nothing is specified, then `geoboundary meta` will list all the countries in the database. This might be useful to get the ISO3 codes or check which countries are available.
 
@@ -168,11 +170,124 @@ geoboundary WLD, level(ADM0 ADM1) replace convert remove
 ```
 
 
+### Eurostat GISCO NUTS layers
+
+List the supported download settings:
+
+```stata
+geoboundary meta, source(eurostat)
+```
+
+Download NUTS2 polygons in EPSG:4326 (WGS84), convert to Stata, and remove the raw shapefiles:
+
+```stata
+geoboundary EUR, source(eurostat) level(NUTS2) vintage(2024) scale(20m) convert remove
+```
+
+`EUR` means all countries supplied in the GISCO layer, not EU membership filtering. Country-specific downloads are not currently supported.
+Levels are `NUTS0`, `NUTS1`, `NUTS2`, and `NUTS3`; `ALL` downloads all four. NUTS levels are statistical units and must not be treated as equivalent to ADM levels.
+
+Supported vintages are 2003, 2006, 2010, 2013, 2016, 2021, and 2024; the default is 2024.
+Scales are `01m`, `03m`, `10m`, `20m` (default), and `60m`, denoting 1:1, 1:3, 1:10, 1:20, and 1:60 million.
+NUTS 2003 is not available at `60m`. Finer scales produce larger files.
+Only region polygons (`RG`) are downloaded, directly in WGS84; no reprojection tools are required.
+
+Default converted filenames are `ESTAT_NUTS2_2024_20M_4326.dta` and `ESTAT_NUTS2_2024_20M_4326_shp.dta`.
+`name(myregions)` to keep the level, vintage, scale, and CRS suffixes.
+
+
+```stata
+geoboundary EUR, source(eurostat) level(ALL) vintage(2021) scale(60m) ///
+    convert geoframe remove
+
+geoplot (area ESTAT_NUTS2_2021_60M_4326, color(white) lc(gs8)), tight
+```
+
+Original attributes such as `NUTS_ID`, `CNTR_CODE`, and `LEVL_CODE` are preserved. Merge regional statistics on `NUTS_ID` only after verifying that both datasets use the same NUTS vintage.
+The observation year does not necessarily identify the classification vintage. Different vintages may involve code changes, splits, mergers, or boundary transfers.
+The package does not harmonise statistics between vintages; use official recalculated statistics or a documented crosswalk.
+
+The converted datasets carry `geoboundary_*` characteristics recording source, vintage, level, scale, CRS, URL, and retrieval date.
+`return list` reports `r(source)`, `r(vintage)`, `r(scale)`, `r(levels)`, `r(crs)`, `r(retrieved)`, `r(files)`, and `r(urls)`.
+GISCO may correct files within a vintage, so retaining a local copy for reproducibility is recommended. Consult the [GISCO catalogue and download provisions](https://gisco-services.ec.europa.eu/distribution/v2/) and acknowledge Eurostat/GISCO when using these data. The package's MIT licence does not replace the source's data usage conditions.
+
+#### Eurostat maps
+
+Download all four NUTS 2024 levels plus NUTS2 2021, load them as geoframes, and clip to mainland Europe (dropping overseas territories):
+
+```stata
+geoboundary EUR, source(eurostat) level(ALL) vintage(2024) scale(20m) convert replace remove
+geoboundary EUR, source(eurostat) level(NUTS2) vintage(2021) scale(20m) convert replace remove
+
+foreach f in NUTS0_2024 NUTS1_2024 NUTS2_2024 NUTS3_2024 NUTS2_2021 {
+	geoframe create `f' using ESTAT_`f'_20M_4326.dta, replace
+	frame `f': geoframe rclip -25 45 34 72
+}
+```
+
+The NUTS hierarchy:
+
+```stata
+geoplot ///
+	(area NUTS3_2024, color(white) lc(gs10) lw(0.02) label("NUTS3"))	///
+	(line NUTS2_2024, lc(red) lw(0.06) label("NUTS2"))					///
+	(line NUTS1_2024, lc(blue) lw(0.1) label("NUTS1"))					///
+	(line NUTS0_2024, lc(black) lw(0.15) label("NUTS0"))				///
+	, tight project(albers 43 62 1 10 52) background(water) glegend(layout(4 3 2 1) position(nw)) ///
+	title("NUTS 2024 hierarchy: NUTS0 to NUTS3")
+```
+
+<img src="/GIS/eurostat_nuts_levels.png" width="100%">
+
+The GISCO layers ship with attributes such as the NUTS3 urban-rural typology (`URBN_TYPE`):
+
+```stata
+frame NUTS3_2024 {
+	destring URBN_TYPE, replace force
+	label define urbn 1 "Predominantly urban" 2 "Intermediate" 3 "Predominantly rural", replace
+	label values URBN_TYPE urbn
+}
+
+geoplot ///
+	(area NUTS3_2024 i.URBN_TYPE, color(tableau) lc(white) lw(0.02))	///
+	(line NUTS0_2024, lc(black) lw(0.12))								///
+	, tight `proj' background(water) legend(pos(10)) ///
+	title("NUTS3 urban-rural typology (NUTS 2024)")
+```
+
+<img src="/GIS/eurostat_nuts3_urban.png" width="100%">
+
+Vintages are distinct geographies. Linking on `NUTS_ID` shows which NUTS2 codes exist in only one vintage:
+
+```stata
+frame NUTS2_2024 {
+	frlink 1:1 NUTS_ID, frame(NUTS2_2021) generate(_l2021)
+	gen byte new2024 = missing(_l2021)
+}
+frame NUTS2_2021 {
+	frlink 1:1 NUTS_ID, frame(NUTS2_2024) generate(_l2024)
+	gen byte only2021 = missing(_l2024)
+}
+
+geoplot ///
+	(area NUTS2_2024, color(gs14) lc(white) lw(0.03) label("Unchanged code"))						///
+	(area NUTS2_2021 if only2021==1, color(red%60) lc(white) lw(0.03) label("NUTS 2021 only"))		///
+	(area NUTS2_2024 if new2024==1, color(blue%70) lc(white) lw(0.03) label("New in NUTS 2024"))	///
+	(line NUTS0_2024, lc(black) lw(0.1))															///
+	, tight `proj' background(water) glegend(layout(1 2 3) position(nw)) ///
+	title("NUTS2 code changes: 2021 vs 2024 vintages")
+```
+
+<img src="/GIS/eurostat_nuts2_vintages.png" width="100%">
+
+Unchanged codes do not guarantee unchanged boundaries; check the official NUTS amendment tables before comparing across vintages.
+
+
 ### Plot the map
 
 Once the files are downloaded we can see if they are working.
 
-For Stata 16 or lower, we can use the `spmap` command:
+We can use the `spmap` command:
 
 
 ```stata
@@ -183,7 +298,7 @@ spmap using WLD_ADM0_shp, id(_ID)
 
 <img src="/GIS/world_spmap.png" width="100%">
 
-For Stata 17 or higher, we can use the `geoplot` command:
+Or the `geoplot` command:
 
 
 ```stata
@@ -423,6 +538,12 @@ By accessing or using the GIS data provided through this package, you acknowledg
 
 ## Change log
 
+**v1.3 (15 Oct 2026)**
+- Minimum Stata version raised to 17.
+- Added Eurostat GISCO NUTS0-NUTS3 region polygons with `vintage()` and `scale()` selection in EPSG:4326.
+- Added source-specific metadata, output provenance, staged extraction, overwrite protection, and integration tests.
+- Corrected country metadata fall-through and numeric ADM-level searches; improved source and level validation.
+
 **v1.23 (01 Sep 2026)**
 - Refreshed the World Bank ADM0-ADM2 shapefiles to match the World Bank's July 2026 data update.
 
@@ -453,7 +574,6 @@ By accessing or using the GIS data provided through this package, you acknowledg
 
 **v1.0 (25 Nov 2024)**
 - First release
-
 
 
 
