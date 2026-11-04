@@ -15,7 +15,7 @@
 A package for fetching country-level or global adminstrative boundaries from the following databases:
 -    [geoBoundaries](https://www.geoboundaries.org/) 
 -    [GADM](https://gadm.org/) v4.1
--    [World Bank](https://datacatalog.worldbank.org/search/dataset/0038272/World-Bank-Official-Boundaries) official ADM0-ADM2 layers (July 2026 release) and optional NDLSA polygons (October 2026 release).
+-    [World Bank](https://datacatalog.worldbank.org/search/dataset/0038272/World-Bank-Official-Boundaries) official ADM0-ADM2 layers and optional NDLSA polygons (21 October 2026 release).
 -    [Eurostat GISCO](https://gisco-services.ec.europa.eu/distribution/v2/nuts/) NUTS0-NUTS3 region polygons.
 
 Please note that by using the data provided through this package, you are acknowledging the [disclaimer](#Disclaimer).
@@ -414,8 +414,8 @@ Without `replace`, existing NDLSA files and frames are protected.
 `level(ALL)` retains its existing ADM-only behavior; add NDLSA explicitly
 using an ADM-level list as above.
 
-Unlike the mirrored July 2026 ADM layers, NDLSA is downloaded directly from
-the official World Bank catalogue's October 2026 shapefile release.
+ADM0-ADM2 and NDLSA are downloaded directly from
+the official World Bank catalogue's 21 October 2026 shapefile release.
 The source dates differ, so check compatibility for your map and retain
 local copies for reproducibility. NDLSA is a legal-status layer, not a
 general inventory of active conflicts.
@@ -444,7 +444,7 @@ geoplot ///
 	project(robinson) background(water) grid(lc(white) label)	///
 	legend(pos(7)) ///
 	title("World Bank ADM0 boundaries and NDLSA") ///
-	note("Magenta: World Bank Non-Determined Legal Status Areas (NDLSA). ADM0: July 2026; NDLSA: October 2026.", size(2))
+	note("Magenta: World Bank Non-Determined Legal Status Areas (NDLSA). Boundaries: 21 October 2026 release.", size(2))
 ```
 
 <img src="./GIS/wb_admin0.png" width="100%">
@@ -464,7 +464,7 @@ geoplot ///
 	tight ///
 	legend(pos(7))  ///
 	title("World Bank ADM0, ADM1, ADM2 boundaries and NDLSA", size(6)) ///
-	note("Orange: World Bank Non-Determined Legal Status Areas (NDLSA). ADM0-ADM2: July 2026; NDLSA: October 2026.", size(2.5))
+	note("Orange: World Bank Non-Determined Legal Status Areas (NDLSA). Boundaries: 21 October 2026 release.", size(2.5))
 ```
 
 <img src="./GIS/wb_release5.png" width="100%">
@@ -607,6 +607,7 @@ Source data may change without notice. Consult the original providers for curren
 ## Change log
 
 **v1.31 (04 Nov 2026)**
+- Updated World Bank ADM0-ADM2 downloads to the official 21 October 2026 release, matching NDLSA; all four layers now use official catalogue archives rather than the July ADM mirror.
 - Added optional World Bank disputed-area polygons with `level(NDLSA)`, kept separate from ADM layers.
 - Updated examples, help, references, and the disclaimer. Existing download defaults are unchanged.
 

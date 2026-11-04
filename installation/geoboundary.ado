@@ -2,6 +2,7 @@
 *! Asjad Naqvi (asjadnaqvi@gmail.com)
 
 * v1.31 (04 Nov 2026): Optional World Bank NDLSA polygons downloaded directly from the official catalogue.
+* v1.31 (04 Nov 2026): World Bank ADM0-ADM2 and NDLSA use the official 21 Oct 2026 release.
 * v1.3  (15 Oct 2026): Eurostat GISCO NUTS layers in WGS84, with vintage and scale selection. Requires Stata 17.
 * v1.23 (01 Sep 2026): Refreshed World Bank release 5 shapefiles (Jul 2026 update).
 * v1.22 (02 Nov 2025): Update to World Bank release 5 which now has ADM0-ADM2 boundaries.
@@ -50,6 +51,7 @@ cap prog drop _geogisco_run
 cap prog drop _geogisco_download
 cap prog drop _geob_retry
 cap prog drop _geowb_ndlsa
+cap prog drop _geowb_download
 cap prog drop _geometa
 
 program define geoboundary, rclass 
@@ -191,7 +193,7 @@ syntax anything, [level(string) convert replace remove name(string) source(strin
 		confirm name `ndlsa_out'
 		if "`geoframe'" != "" {
 			confirm name `ndlsa_out'_shp
-			which geoframe
+			*which geoframe
 		}
 		if "`replace'" == "" {
 			foreach ext in shp shx dbf prj cpg {
@@ -390,7 +392,7 @@ syntax anything, [level(string) convert replace remove name(string) source(strin
 		}
 		
 		
-		// WORLD BANK // Updated to release 5
+		// WORLD BANK // Official 21 Oct 2026 release
 		
 		if "`source'"=="worldbank" & "`anything'"!="meta"  {
 
@@ -399,27 +401,15 @@ syntax anything, [level(string) convert replace remove name(string) source(strin
 					local lvl = upper("`lvl'")
 					
 					// fetch
-					if "`lvl'" == "NDLSA" noisily display in yellow _newline "World Bank NDLSA (official catalogue): Fetching" _continue
-					else noisily display in yellow _newline "World Bank `lvl' (Jul 14, 2026): Fetching" _continue
+					noisily display in yellow _newline "World Bank `lvl' (21 Oct 2026, official catalogue): Fetching" _continue
 					
 					local _check = 0
 					local conversion_replace replace
-					if "`lvl'" == "NDLSA" {
-						_geowb_ndlsa, `rep'
-						local conversion_replace `rep'
+					if inlist("`lvl'", "ADM0", "ADM1", "ADM2", "NDLSA") {
+						_geowb_download, level(`lvl') `rep'
+						if "`lvl'" == "NDLSA" local conversion_replace `rep'
 					}
-					
-					else if `skip' == 1 {
-						foreach j in shp prj shx dbf cpg {
-							*capture copy "`baseurl'/`x1'/`lvl'/geoBoundaries-`x1'-`lvl'.`j'" "`x1'_`lvl'.`j'", `rep'
-							
-							capture _geob_retry copy "https://huggingface.co/datasets/asjadnaqvi/shapefiles/resolve/main/WB_GAD_`lvl'.`j'" "WB_`lvl'.`j'", `rep'
-							
-							if _rc!= 0 {
-								local ++_check
-							}	
-						}
-					}
+					else local _check = 1
 
 					
 
@@ -473,27 +463,34 @@ syntax anything, [level(string) convert replace remove name(string) source(strin
 	
 end
 
-program define _geowb_ndlsa
+program define _geowb_download
 	version 17
-	syntax, [replace]
+	syntax, level(string) [replace]
 
-	local url "https://datacatalogfiles.worldbank.org/ddh-published/0038272/3/DR0095371/World%20Bank%20Official%20Boundaries%20%28Shapefiles%29/World%20Bank%20Official%20Boundaries%20-%20NDLSA.zip"
-	local remote "World Bank Official Boundaries - NDLSA"
+	local suffix "NDLSA"
+	local url_suffix "NDLSA"
+	if "`level'" != "NDLSA" {
+		local admin = substr("`level'", 4, 1)
+		local suffix "Admin `admin'"
+		local url_suffix "Admin%20`admin'"
+	}
+	local url "https://datacatalogfiles.worldbank.org/ddh-published/0038272/3/DR0095371/World%20Bank%20Official%20Boundaries%20%28Shapefiles%29/World%20Bank%20Official%20Boundaries%20-%20`url_suffix'.zip"
+	local remote "World Bank Official Boundaries - `suffix'"
 	local cwd `"`c(pwd)'"'
 	local sep = cond("`c(os)'" == "Windows", char(92), "/")
 	tempfile archive
-	local stage `"`archive'_ndlsa"'
+	local stage `"`archive'_worldbank"'
 	_geob_retry copy "`url'" `"`archive'"'
 	mkdir `"`stage'"'
 	capture noisily {
 		quietly cd `"`stage'"'
-		unzipfile `"`archive'"', ifilter("World Bank Official Boundaries - NDLSA\.(shp|shx|dbf|prj|cpg)")
+		unzipfile `"`archive'"', ifilter("^`remote'\.(shp|shx|dbf|prj|cpg)$")
 		foreach ext in shp shx dbf prj cpg {
 			confirm file "`remote'.`ext'"
 		}
 		quietly cd `"`cwd'"'
 		foreach ext in shp shx dbf prj cpg {
-			_geob_retry copy `"`stage'`sep'`remote'.`ext'"' "WB_NDLSA.`ext'", `replace'
+			_geob_retry copy `"`stage'`sep'`remote'.`ext'"' "WB_`level'.`ext'", `replace'
 		}
 	}
 	local rc = _rc
@@ -517,7 +514,7 @@ program define _geowb_ndlsa
 		if !`rc' local rc = `cleanup_rc'
 	}
 	if `rc' {
-		di as error "World Bank NDLSA download failed; any published raw files have been retained."
+		di as error "World Bank `level' download failed; any published raw files have been retained."
 		exit `rc'
 	}
 end

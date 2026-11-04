@@ -11,7 +11,7 @@ A Stata 17+ package for fetching boundary data from:
 
 1. {browse "https://www.geoboundaries.org/":geoBoundaries} (default).
 2. {browse "https://gadm.org/":GADM} v4.1
-3. {browse "https://datacatalog.worldbank.org/search/dataset/0038272/World-Bank-Official-Boundaries":World Bank} global layers release 5 (July 2026 update).
+3. {browse "https://datacatalog.worldbank.org/search/dataset/0038272/World-Bank-Official-Boundaries":World Bank} global layers (21 October 2026 release).
 4. {browse "https://gisco-services.ec.europa.eu/distribution/v2/nuts/":Eurostat GISCO} NUTS region polygons.
 
 All files are in the standard EPSG:4326 or {browse "https://en.wikipedia.org/wiki/World_Geodetic_System":WGS84} system.
@@ -168,8 +168,8 @@ existing files and frames require {cmd:replace}.
 Failed NDLSA conversion retains the raw files.
 
 {pstd}
-NDLSA comes directly from the official catalogue's October 2026 shapefile release,
-whereas the ADM layers remain the mirrored July 2026 release.
+ADM0-ADM2 and NDLSA come directly from the official catalogue's
+21 October 2026 shapefile release.
 Check compatibility and retain local copies for reproducibility.
 
 {phang2}{cmd:geoboundary WLD, source(worldbank) level(ADM0) convert}{p_end}
@@ -275,7 +275,7 @@ See the {browse "https://gadm.org/license.html":GADM licence} for usage conditio
 
 {pstd}
 World Bank (2026). World Bank Official Boundaries. World Bank Data Catalog.
-ADM0-ADM2: July 2026 release; NDLSA: October 2026 release.
+ADM0-ADM2 and NDLSA: 21 October 2026 release.
 {browse "https://datacatalog.worldbank.org/search/dataset/0038272/world-bank-official-boundaries":Dataset}.
 
 {pstd}
