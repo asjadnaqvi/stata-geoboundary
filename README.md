@@ -33,7 +33,7 @@ The package uses globally standardized administration boundary classifications. 
 
 The package can be installed via SSC or GitHub. The GitHub version, *might* be more recent due to bug fixes, feature updates etc, and *may* contain syntax improvements and changes in *default* values. See version numbers below. Eventually the GitHub version is published on SSC.
 
-The SSC version (**v1.2**):
+The SSC version (**v1.3**):
 
 ```stata
 ssc install geoboundary, replace
@@ -78,13 +78,19 @@ Syntax for boundary data:
 
 ```stata
 geoboundary ISO3 codes, level(string) [ source(str) vintage(str) scale(str) convert geoframe name(str) replace remove ]
-geoboundary EUR, source(eurostat) level(string) [ vintage(str) scale(str) convert geoframe name(str) replace remove ]
 ```
 
 See `help geoboundary` for details.
 
 
 ## Examples
+
+Choose a source:
+
+- [geoBoundaries](#geoboundaries-default): country and global boundaries, plotting, and combining countries.
+- [GADM](#gadm): downloading boundaries and comparing them with geoBoundaries.
+- [World Bank](#world-bank): administrative boundaries and the separate NDLSA layer.
+- [Eurostat GISCO](#eurostat-gisco): NUTS regions, classification vintages, and map scales.
 
 Before starting, make sure you are in the correct directory where the maps files will be downloaded:
 
@@ -93,7 +99,7 @@ cd <mypath>
 ```
 
 
-### Meta data
+### Country metadata: geoBoundaries and GADM
 
 The meta data syntax loads the **geoboundary_meta.dta** file from the [GIS](/gis) folder and parses it depending on the query. If you would like the full overview, download the file directly from GitHub.
 
@@ -141,7 +147,11 @@ where `return list` will show us two locals `r(geob)` and `r(gadm)` or the list 
 
 
 
-### Boundary data
+### geoBoundaries (default)
+
+geoBoundaries is used when `source()` is omitted. You can also specify `source(geoboundaries)` or `source(geob)`.
+
+#### Downloading and converting boundaries
 
 Download the raw shapefiles in ESRI format:
 
@@ -170,7 +180,299 @@ geoboundary WLD, level(ADM0 ADM1) replace convert remove
 ```
 
 
-### Eurostat GISCO NUTS layers
+#### Plotting the global map
+
+Once the files are downloaded we can see if they are working.
+
+We can use the `spmap` command:
+
+
+```stata
+use WLD_ADM0, clear
+
+spmap using WLD_ADM0_shp, id(_ID)
+```
+
+<img src="./GIS/world_spmap.png" width="100%">
+
+Or the `geoplot` command:
+
+
+```stata
+geoframe create WLD_ADM0
+
+geoplot (line WLD_ADM0, lc(black)), tight
+```
+
+<img src="./GIS/world_geoplot.png" width="100%">
+
+#### Combining global ADM0 and ADM1 layers
+
+If you have already downloaded global ADM0 and ADM1 boundaries, we can make a nicer map using the following code:
+
+```stata
+geoframe create WLD_ADM0
+geoframe create WLD_ADM1
+
+
+geoplot ///
+	(area WLD_ADM1, color(white) lc(red) lw(0.02))	///
+	(line WLD_ADM0, lc(gs3) lw(0.03))	///
+	, tight project(robinson) background(water) grid(lc(white) label)	///
+	title("Global ADM0 and ADM1 boundaries") ///
+	note("Source: https://www.geoboundaries.org/. Accessed using the #Stata #geoboundary package.", size(1.8))
+```
+
+<img src="./GIS/world_geoplot2.png" width="100%">
+
+
+#### Downloading, converting, merging, and plotting countries
+
+Here is another example, where we download the DACH countries - Austria, Switzerland, and Germany, for three admin levels, and merge them together using the `geoplot` package (Stata v17+ only):
+
+```stata
+geoboundary DEU AUT CHE, level(ADM0 ADM1 ADM2) replace convert remove
+
+geoframe create AUT_ADM0, replace
+geoframe create AUT_ADM1, replace
+geoframe create AUT_ADM2, replace
+
+geoframe create CHE_ADM0, replace
+geoframe create CHE_ADM1, replace
+geoframe create CHE_ADM2, replace
+
+geoframe create DEU_ADM0, replace
+geoframe create DEU_ADM1, replace
+geoframe create DEU_ADM2, replace
+
+
+geoframe stack AUT_ADM0 CHE_ADM0 DEU_ADM0, into(dach0) replace
+geoframe stack AUT_ADM1 CHE_ADM1 DEU_ADM1, into(dach1) replace
+geoframe stack AUT_ADM2 CHE_ADM2 DEU_ADM2, into(dach2) replace
+```
+
+and plot
+
+```stata
+geoplot ///
+	(area dach2 i._FRAME, lw(0.01) lc(white))	///
+	(line dach1 i._FRAME, lw(0.04) lc(white))	///
+	(line dach0 i._FRAME, lw(0.05) lc(black))	///
+	, tight project(peters) grid
+
+```
+
+<img src="./GIS/world_geoplot3.png" width="100%">
+
+
+### GADM
+
+Use `source(gadm)` to download GADM v4.1 boundaries. Each country archive contains all available administrative levels, so `level()` is not required and is ignored if supplied.
+
+```stata
+geoboundary MEX, source(gadm) replace convert remove name(gadm_mex)
+```
+
+The following examples compare GADM with geoBoundaries, using separate output names for each source.
+
+#### Mexico: comparing GADM and geoBoundaries
+
+Let's download Mexico's boundaries from both geoBoundaries and GADM:
+
+```stata
+geoboundary mex, level(all) replace convert remove name(geob_mex)
+geoboundary mex, level(all) replace convert remove name(gadm_mex) source(gadm) 
+```
+
+and convert them to `geoframes`
+
+```stata
+geoframe create geob_mex_ADM0, replace
+geoframe create geob_mex_ADM1, replace
+geoframe create geob_mex_ADM2, replace
+
+geoframe create gadm_mex_ADM0, replace
+geoframe create gadm_mex_ADM1, replace
+geoframe create gadm_mex_ADM2, replace
+```
+
+and let's plot the two:
+
+```stata
+geoplot ///
+	(area geob_mex_ADM2, color(white) lc(red) lw(0.02))	///
+	(line geob_mex_ADM1, lc(blue) lw(0.04))	///
+	(line geob_mex_ADM0, lc(black) lw(0.1))	///
+	, tight title("Mexico from geoBoundaries")
+	
+geoplot ///
+	(area gadm_mex_ADM2, color(white) lc(red) lw(0.02))	///
+	(line gadm_mex_ADM1, lc(blue) lw(0.04))	///
+	(line gadm_mex_ADM0, lc(black) lw(0.1))	///
+	, tight  title("Mexico from GDAM")
+```
+
+<img src="./GIS/geoboundary_mex1.png" width="100%">
+
+<img src="./GIS/geoboundary_mex2.png" width="100%">
+
+The maps look fairly similar but this does not mean that both the datasets give us the exact boundaries.
+
+#### The Gambia: comparing GADM and geoBoundaries
+
+Let's try another example by using the Gambia:
+
+
+```stata
+geoboundary meta, any(GAM) length(15)	 // get the iso3 code
+
+
+geoboundary GMB, level(all) replace convert remove name(gadm_gmb) source(gadm) 
+geoboundary GMB, level(all) replace convert remove name(geob_gmb)	
+	
+	
+geoframe create geob_gmb_ADM0, replace
+geoframe create geob_gmb_ADM1, replace
+geoframe create geob_gmb_ADM2, replace
+
+geoframe create gadm_gmb_ADM0, replace
+geoframe create gadm_gmb_ADM1, replace
+geoframe create gadm_gmb_ADM2, replace
+```
+
+and plot:
+
+```
+geoplot ///
+	(area geob_gmb_ADM2, color(white) lc(red) lw(0.05))	///
+	(line geob_gmb_ADM1, lc(blue) lw(0.1))	///
+	(line geob_gmb_ADM0, lc(black) lw(0.2))	///
+	, tight title("The Gambia from geoBoundaries")
+	
+	
+geoplot ///
+	(area gadm_gmb_ADM2, color(white) lc(red) lw(0.05))	///
+	(line gadm_gmb_ADM1, lc(blue) lw(0.1))	///
+	(line gadm_gmb_ADM0, lc(black) lw(0.2))	///
+	, tight  title("The Gambia from GDAM")	
+```
+
+<img src="./GIS/geoboundary_gmb1.png" width="100%">
+
+<img src="./GIS/geoboundary_gmb2.png" width="100%">
+
+Both the maps look different. We can actually compare these by plotting the geoframes together:
+
+```stata
+geoplot ///
+	(line geob_gmb_ADM2, lc(red) lw(0.2) label("geoBoundaries"))	///
+	(line gadm_gmb_ADM2, lc(blue) lw(0.2) label("GADM"))	///
+	, tight title("The Gambia: Geoboundary vs GDAM") ///
+	glegend(layout(1 - 2) tsize(3.5))
+```
+
+<img src="./GIS/geoboundary_gmb3.png" width="100%">
+
+where we see that the GADM data is more coarse than the geoboundaries data. There could also be differences in the number of regions or boundaries available from the two datasets.
+
+
+### World Bank
+
+Download the layer using this standard code:
+
+```stata
+geoboundary WLD, level(ADM0 ADM1 ADM2 NDLSA) replace convert remove source(worldbank) geoframe
+```
+
+#### Example: including disputed areas
+
+Disputed areas are supplied separately by the World Bank as **NDLSA**
+(Non-Determined Legal Status Areas), not as country ADM polygons. To include
+them, explicitly request the optional layer:
+
+```stata
+geoboundary WLD, level(ADM0 NDLSA) replace convert remove source(worldbank) geoframe
+
+geoplot ///
+    (area WB_ADM0, fc(gs14) lc(white)) ///
+    (area WB_NDLSA, fc(orange) lc(black)), ///
+    project(robinson) legend(off) ///
+    title("World Bank boundaries and NDLSA") ///
+    note("Orange: Non-Determined Legal Status Areas (NDLSA). Source: World Bank.")
+
+graph export "wb_ndlsa.png", replace width(2400)
+```
+
+<img src="./GIS/wb_ndlsa.png" width="100%">
+
+NDLSA can also be downloaded alone with `level(NDLSA)`. Its polygons and
+original attributes are kept separate; no country ownership is assigned.
+Raw files are named `WB_NDLSA.*`, converted datasets are `WB_NDLSA.dta` and
+`WB_NDLSA_shp.dta`, and `name(mymap)` changes the converted prefix to
+`mymap_NDLSA`. The `geoframe` and `remove` options require `convert` for this layer.
+Without `replace`, existing NDLSA files and frames are protected.
+`level(ALL)` retains its existing ADM-only behavior; add NDLSA explicitly
+using an ADM-level list as above.
+
+Unlike the mirrored July 2026 ADM layers, NDLSA is downloaded directly from
+the official World Bank catalogue's October 2026 shapefile release.
+The source dates differ, so check compatibility for your map and retain
+local copies for reproducibility. NDLSA is a legal-status layer, not a
+general inventory of active conflicts.
+
+#### Working with the ADM layers
+
+If you have already downloaded the files, then just covert them directly in geoframe rather downloading them again using the above command:
+
+```stata
+geoframe create WB_ADM0, replace
+geoframe create WB_ADM1, replace
+geoframe create WB_ADM2, replace
+geoboundary WLD, source(worldbank) level(NDLSA) replace convert remove geoframe
+```
+
+Remember that frames can checked using `frames dir` or one can also switch to an active frame to get the variables or merge datasets etc using `frame change <frame name>`.
+
+Test out the data:
+
+```stata
+geoplot ///
+	(area WB_ADM0 i.WB_REGION, lc(white) lw(0.1) ) ///
+	(area WB_NDLSA, fc(magenta) lc(black) lw(0.04)) ///
+	, ///
+	tight ///
+	project(robinson) background(water) grid(lc(white) label)	///
+	legend(pos(7)) ///
+	title("World Bank ADM0 boundaries and NDLSA") ///
+	note("Magenta: World Bank Non-Determined Legal Status Areas (NDLSA). ADM0: July 2026; NDLSA: October 2026.", size(2))
+```
+
+<img src="./GIS/wb_admin0.png" width="100%">
+
+
+Plot all the layers (warning, very large files!): 
+
+
+
+```stata
+geoplot ///
+	(area WB_NDLSA, fc(orange) lc(black) lw(0.04)) ///
+	(line WB_ADM2, lc(red) lw(0.02) ) ///
+	(line WB_ADM1, lc(blue) lw(0.05) ) ///
+	(line WB_ADM0, lc(black) lw(0.1) ) ///
+	, ///
+	tight ///
+	legend(pos(7))  ///
+	title("World Bank ADM0, ADM1, ADM2 boundaries and NDLSA", size(6)) ///
+	note("Orange: World Bank Non-Determined Legal Status Areas (NDLSA). ADM0-ADM2: July 2026; NDLSA: October 2026.", size(2.5))
+```
+
+<img src="./GIS/wb_release5.png" width="100%">
+
+
+### Eurostat GISCO
+
+#### Downloading NUTS layers
 
 List the supported download settings:
 
@@ -281,282 +583,6 @@ geoplot ///
 <img src="./GIS/eurostat_nuts2_vintages.png" width="100%">
 
 Unchanged codes do not guarantee unchanged boundaries; check the official NUTS amendment tables before comparing across vintages.
-
-
-### Plot the map
-
-Once the files are downloaded we can see if they are working.
-
-We can use the `spmap` command:
-
-
-```stata
-use WLD_ADM0, clear
-
-spmap using WLD_ADM0_shp, id(_ID)
-```
-
-<img src="./GIS/world_spmap.png" width="100%">
-
-Or the `geoplot` command:
-
-
-```stata
-geoframe create WLD_ADM0
-
-geoplot (line WLD_ADM0, lc(black)), tight
-```
-
-<img src="./GIS/world_geoplot.png" width="100%">
-
-### A nicer example
-
-If you have already downloaded global ADM0 and ADM1 boundaries, we can make a nicer map using the following code:
-
-```stata
-geoframe create WLD_ADM0
-geoframe create WLD_ADM1
-
-
-geoplot ///
-	(area WLD_ADM1, color(white) lc(red) lw(0.02))	///
-	(line WLD_ADM0, lc(gs3) lw(0.03))	///
-	, tight project(robinson) background(water) grid(lc(white) label)	///
-	title("Global ADM0 and ADM1 boundaries") ///
-	note("Source: https://www.geoboundaries.org/. Accessed using the #Stata #geoboundary package.", size(1.8))
-```
-
-<img src="./GIS/world_geoplot2.png" width="100%">
-
-
-## Downloading, coverting, merging, and plotting
-
-Here is another example, where we download the DACH countries - Austria, Switzerland, and Germany, for three admin levels, and merge them together using the `geoplot` package (Stata v17+ only):
-
-```stata
-geoboundary DEU AUT CHE, level(ADM0 ADM1 ADM2) replace convert remove
-
-geoframe create AUT_ADM0, replace
-geoframe create AUT_ADM1, replace
-geoframe create AUT_ADM2, replace
-
-geoframe create CHE_ADM0, replace
-geoframe create CHE_ADM1, replace
-geoframe create CHE_ADM2, replace
-
-geoframe create DEU_ADM0, replace
-geoframe create DEU_ADM1, replace
-geoframe create DEU_ADM2, replace
-
-
-geoframe stack AUT_ADM0 CHE_ADM0 DEU_ADM0, into(dach0) replace
-geoframe stack AUT_ADM1 CHE_ADM1 DEU_ADM1, into(dach1) replace
-geoframe stack AUT_ADM2 CHE_ADM2 DEU_ADM2, into(dach2) replace
-```
-
-and plot
-
-```stata
-geoplot ///
-	(area dach2 i._FRAME, lw(0.01) lc(white))	///
-	(line dach1 i._FRAME, lw(0.04) lc(white))	///
-	(line dach0 i._FRAME, lw(0.05) lc(black))	///
-	, tight project(peters) grid
-
-```
-
-<img src="./GIS/world_geoplot3.png" width="100%">
-
-
-### v1.1 examples:
-
-Let's download Mexico's boundaries from both geoBoundaries and GADM:
-
-```stata
-geoboundary mex, level(all) replace convert remove name(geob_mex)
-geoboundary mex, level(all) replace convert remove name(gadm_mex) source(gadm) 
-```
-
-and convert them to `geoframes`
-
-```stata
-geoframe create geob_mex_ADM0, replace
-geoframe create geob_mex_ADM1, replace
-geoframe create geob_mex_ADM2, replace
-
-geoframe create gadm_mex_ADM0, replace
-geoframe create gadm_mex_ADM1, replace
-geoframe create gadm_mex_ADM2, replace
-```
-
-and let's plot the two:
-
-```stata
-geoplot ///
-	(area geob_mex_ADM2, color(white) lc(red) lw(0.02))	///
-	(line geob_mex_ADM1, lc(blue) lw(0.04))	///
-	(line geob_mex_ADM0, lc(black) lw(0.1))	///
-	, tight title("Mexico from geoBoundaries")
-	
-geoplot ///
-	(area gadm_mex_ADM2, color(white) lc(red) lw(0.02))	///
-	(line gadm_mex_ADM1, lc(blue) lw(0.04))	///
-	(line gadm_mex_ADM0, lc(black) lw(0.1))	///
-	, tight  title("Mexico from GDAM")
-```
-
-<img src="./GIS/geoboundary_mex1.png" width="100%">
-
-<img src="./GIS/geoboundary_mex2.png" width="100%">
-
-The maps look fairly similar but this does not mean that both the datasets give us the exact boundaries. Let's try another example by using the Gambia:
-
-
-```stata
-geoboundary meta, any(GAM) length(15)	 // get the iso3 code
-
-
-geoboundary GMB, level(all) replace convert remove name(gadm_gmb) source(gadm) 
-geoboundary GMB, level(all) replace convert remove name(geob_gmb)	
-	
-	
-geoframe create geob_gmb_ADM0, replace
-geoframe create geob_gmb_ADM1, replace
-geoframe create geob_gmb_ADM2, replace
-
-geoframe create gadm_gmb_ADM0, replace
-geoframe create gadm_gmb_ADM1, replace
-geoframe create gadm_gmb_ADM2, replace
-```
-
-and plot:
-
-```
-geoplot ///
-	(area geob_gmb_ADM2, color(white) lc(red) lw(0.05))	///
-	(line geob_gmb_ADM1, lc(blue) lw(0.1))	///
-	(line geob_gmb_ADM0, lc(black) lw(0.2))	///
-	, tight title("The Gambia from geoBoundaries")
-	
-	
-geoplot ///
-	(area gadm_gmb_ADM2, color(white) lc(red) lw(0.05))	///
-	(line gadm_gmb_ADM1, lc(blue) lw(0.1))	///
-	(line gadm_gmb_ADM0, lc(black) lw(0.2))	///
-	, tight  title("The Gambia from GDAM")	
-```
-
-<img src="./GIS/geoboundary_gmb1.png" width="100%">
-
-<img src="./GIS/geoboundary_gmb2.png" width="100%">
-
-Both the maps look different. We can actually compare these by plotting the geoframes together:
-
-```stata
-geoplot ///
-	(line geob_gmb_ADM2, lc(red) lw(0.2) label("geoBoundaries"))	///
-	(line gadm_gmb_ADM2, lc(blue) lw(0.2) label("GADM"))	///
-	, tight title("The Gambia: Geoboundary vs GDAM") ///
-	glegend(layout(1 - 2) tsize(3.5))
-```
-
-<img src="./GIS/geoboundary_gmb3.png" width="100%">
-
-where we see that the GADM data is more coarse than the geoboundaries data. There could also be differences in the number of regions or boundaries available from the two datasets.
-
-
-### World Bank's map layer
-
-Download the layer using this standard code:
-
-```stata
-geoboundary WLD, level(ADM0 ADM1 ADM2 NDLSA) replace convert remove source(worldbank) geoframe
-```
-
-#### Example: including disputed areas
-
-Disputed areas are supplied separately by the World Bank as **NDLSA**
-(Non-Determined Legal Status Areas), not as country ADM polygons. To include
-them, explicitly request the optional layer:
-
-```stata
-geoboundary WLD, level(ADM0 NDLSA) replace convert remove source(worldbank) geoframe
-
-geoplot ///
-    (area WB_ADM0, fc(gs14) lc(white)) ///
-    (area WB_NDLSA, fc(orange) lc(black)), ///
-    project(robinson) legend(off) ///
-    title("World Bank boundaries and NDLSA") ///
-    note("Orange: Non-Determined Legal Status Areas (NDLSA). Source: World Bank.")
-
-graph export "wb_ndlsa.png", replace width(2400)
-```
-
-<img src="./GIS/wb_ndlsa.png" width="100%">
-
-NDLSA can also be downloaded alone with `level(NDLSA)`. Its polygons and
-original attributes are kept separate; no country ownership is assigned.
-Raw files are named `WB_NDLSA.*`, converted datasets are `WB_NDLSA.dta` and
-`WB_NDLSA_shp.dta`, and `name(mymap)` changes the converted prefix to
-`mymap_NDLSA`. The `geoframe` and `remove` options require `convert` for this layer.
-Without `replace`, existing NDLSA files and frames are protected.
-`level(ALL)` retains its existing ADM-only behavior; add NDLSA explicitly
-using an ADM-level list as above.
-
-Unlike the mirrored July 2026 ADM layers, NDLSA is downloaded directly from
-the official World Bank catalogue's October 2026 shapefile release.
-The source dates differ, so check compatibility for your map and retain
-local copies for reproducibility. NDLSA is a legal-status layer, not a
-general inventory of active conflicts.
-
-#### Working with the ADM layers
-
-If you have already downloaded the files, then just covert them directly in geoframe rather downloading them again using the above command:
-
-```stata
-geoframe create WB_ADM0, replace
-geoframe create WB_ADM1, replace
-geoframe create WB_ADM2, replace
-geoboundary WLD, source(worldbank) level(NDLSA) replace convert remove geoframe
-```
-
-Remember that frames can checked using `frames dir` or one can also switch to an active frame to get the variables or merge datasets etc using `frame change <frame name>`.
-
-Test out the data:
-
-```stata
-geoplot ///
-	(area WB_ADM0 i.WB_REGION, lc(white) lw(0.1) ) ///
-	(area WB_NDLSA, fc(magenta) lc(black) lw(0.04)) ///
-	, ///
-	tight ///
-	project(robinson) background(water) grid(lc(white) label)	///
-	legend(pos(7)) ///
-	title("World Bank ADM0 boundaries and NDLSA") ///
-	note("Magenta: World Bank Non-Determined Legal Status Areas (NDLSA). ADM0: July 2026; NDLSA: October 2026.", size(2))
-```
-
-<img src="./GIS/wb_admin0.png" width="100%">
-
-
-Plot all the layers (warning, very large files!): 
-
-
-
-```stata
-geoplot ///
-	(area WB_NDLSA, fc(orange) lc(black) lw(0.04)) ///
-	(line WB_ADM2, lc(red) lw(0.02) ) ///
-	(line WB_ADM1, lc(blue) lw(0.05) ) ///
-	(line WB_ADM0, lc(black) lw(0.1) ) ///
-	, ///
-	tight ///
-	legend(pos(7))  ///
-	title("World Bank ADM0, ADM1, ADM2 boundaries and NDLSA", size(6)) ///
-	note("Orange: World Bank Non-Determined Legal Status Areas (NDLSA). ADM0-ADM2: July 2026; NDLSA: October 2026.", size(2.5))
-```
-
-<img src="./GIS/wb_release5.png" width="100%">
 
 
 
