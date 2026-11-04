@@ -9,13 +9,13 @@
 
 
 
-# geoboundary v1.3
-(15 Oct 2026)
+# geoboundary v1.31
+(04 Nov 2026)
 
 A package for fetching country-level or global adminstrative boundaries from the following databases:
 -    [geoBoundaries](https://www.geoboundaries.org/) 
 -    [GADM](https://gadm.org/) v4.1
--    [World Bank](https://datacatalog.worldbank.org/search/dataset/0038272/World-Bank-Official-Boundaries) official ADM0-ADM2 layers (July 2026 release).
+-    [World Bank](https://datacatalog.worldbank.org/search/dataset/0038272/World-Bank-Official-Boundaries) official ADM0-ADM2 layers (July 2026 release) and optional NDLSA polygons (October 2026 release).
 -    [Eurostat GISCO](https://gisco-services.ec.europa.eu/distribution/v2/nuts/) NUTS0-NUTS3 region polygons.
 
 Please note that by using the data provided through this package, you are acknowledging the [disclaimer](#Disclaimer).
@@ -39,7 +39,7 @@ The SSC version (**v1.2**):
 ssc install geoboundary, replace
 ```
 
-Or it can be installed from GitHub (**v1.3**):
+Or it can be installed from GitHub (**v1.31**):
 
 ```stata
 net install geoboundary, from("https://raw.githubusercontent.com/asjadnaqvi/stata-geoboundary/main/installation/") replace
@@ -77,7 +77,7 @@ geoboundary meta, [ country(list) iso(list) level(list) region(list) any(list) l
 Syntax for boundary data: 
 
 ```stata
-geoboundary ISO3 codes, level(string) [ source(str) convert geoframe name(str) replace remove ]
+geoboundary ISO3 codes, level(string) [ source(str) vintage(str) scale(str) convert geoframe name(str) replace remove ]
 geoboundary EUR, source(eurostat) level(string) [ vintage(str) scale(str) convert geoframe name(str) replace remove ]
 ```
 
@@ -237,7 +237,7 @@ geoplot ///
 	title("NUTS 2024 hierarchy: NUTS0 to NUTS3")
 ```
 
-<img src="/GIS/eurostat_nuts_levels.png" width="100%">
+<img src="./GIS/eurostat_nuts_levels.png" width="100%">
 
 The GISCO layers ship with attributes such as the NUTS3 urban-rural typology (`URBN_TYPE`):
 
@@ -255,7 +255,7 @@ geoplot ///
 	title("NUTS3 urban-rural typology (NUTS 2024)")
 ```
 
-<img src="/GIS/eurostat_nuts3_urban.png" width="100%">
+<img src="./GIS/eurostat_nuts3_urban.png" width="100%">
 
 Vintages are distinct geographies. Linking on `NUTS_ID` shows which NUTS2 codes exist in only one vintage:
 
@@ -278,7 +278,7 @@ geoplot ///
 	title("NUTS2 code changes: 2021 vs 2024 vintages")
 ```
 
-<img src="/GIS/eurostat_nuts2_vintages.png" width="100%">
+<img src="./GIS/eurostat_nuts2_vintages.png" width="100%">
 
 Unchanged codes do not guarantee unchanged boundaries; check the official NUTS amendment tables before comparing across vintages.
 
@@ -296,7 +296,7 @@ use WLD_ADM0, clear
 spmap using WLD_ADM0_shp, id(_ID)
 ```
 
-<img src="/GIS/world_spmap.png" width="100%">
+<img src="./GIS/world_spmap.png" width="100%">
 
 Or the `geoplot` command:
 
@@ -307,7 +307,7 @@ geoframe create WLD_ADM0
 geoplot (line WLD_ADM0, lc(black)), tight
 ```
 
-<img src="/GIS/world_geoplot.png" width="100%">
+<img src="./GIS/world_geoplot.png" width="100%">
 
 ### A nicer example
 
@@ -326,7 +326,7 @@ geoplot ///
 	note("Source: https://www.geoboundaries.org/. Accessed using the #Stata #geoboundary package.", size(1.8))
 ```
 
-<img src="/GIS/world_geoplot2.png" width="100%">
+<img src="./GIS/world_geoplot2.png" width="100%">
 
 
 ## Downloading, coverting, merging, and plotting
@@ -365,7 +365,7 @@ geoplot ///
 
 ```
 
-<img src="/GIS/world_geoplot3.png" width="100%">
+<img src="./GIS/world_geoplot3.png" width="100%">
 
 
 ### v1.1 examples:
@@ -405,9 +405,9 @@ geoplot ///
 	, tight  title("Mexico from GDAM")
 ```
 
-<img src="/GIS/geoboundary_mex1.png" width="100%">
+<img src="./GIS/geoboundary_mex1.png" width="100%">
 
-<img src="/GIS/geoboundary_mex2.png" width="100%">
+<img src="./GIS/geoboundary_mex2.png" width="100%">
 
 The maps look fairly similar but this does not mean that both the datasets give us the exact boundaries. Let's try another example by using the Gambia:
 
@@ -446,9 +446,9 @@ geoplot ///
 	, tight  title("The Gambia from GDAM")	
 ```
 
-<img src="/GIS/geoboundary_gmb1.png" width="100%">
+<img src="./GIS/geoboundary_gmb1.png" width="100%">
 
-<img src="/GIS/geoboundary_gmb2.png" width="100%">
+<img src="./GIS/geoboundary_gmb2.png" width="100%">
 
 Both the maps look different. We can actually compare these by plotting the geoframes together:
 
@@ -460,7 +460,7 @@ geoplot ///
 	glegend(layout(1 - 2) tsize(3.5))
 ```
 
-<img src="/GIS/geoboundary_gmb3.png" width="100%">
+<img src="./GIS/geoboundary_gmb3.png" width="100%">
 
 where we see that the GADM data is more coarse than the geoboundaries data. There could also be differences in the number of regions or boundaries available from the two datasets.
 
@@ -470,8 +470,46 @@ where we see that the GADM data is more coarse than the geoboundaries data. Ther
 Download the layer using this standard code:
 
 ```stata
-geoboundary WLD, level(ADM0 ADM1 ADM2) replace convert remove source(worldbank) geoframe
+geoboundary WLD, level(ADM0 ADM1 ADM2 NDLSA) replace convert remove source(worldbank) geoframe
 ```
+
+#### Example: including disputed areas
+
+Disputed areas are supplied separately by the World Bank as **NDLSA**
+(Non-Determined Legal Status Areas), not as country ADM polygons. To include
+them, explicitly request the optional layer:
+
+```stata
+geoboundary WLD, level(ADM0 NDLSA) replace convert remove source(worldbank) geoframe
+
+geoplot ///
+    (area WB_ADM0, fc(gs14) lc(white)) ///
+    (area WB_NDLSA, fc(orange) lc(black)), ///
+    project(robinson) legend(off) ///
+    title("World Bank boundaries and NDLSA") ///
+    note("Orange: Non-Determined Legal Status Areas (NDLSA). Source: World Bank.")
+
+graph export "wb_ndlsa.png", replace width(2400)
+```
+
+<img src="./GIS/wb_ndlsa.png" width="100%">
+
+NDLSA can also be downloaded alone with `level(NDLSA)`. Its polygons and
+original attributes are kept separate; no country ownership is assigned.
+Raw files are named `WB_NDLSA.*`, converted datasets are `WB_NDLSA.dta` and
+`WB_NDLSA_shp.dta`, and `name(mymap)` changes the converted prefix to
+`mymap_NDLSA`. The `geoframe` and `remove` options require `convert` for this layer.
+Without `replace`, existing NDLSA files and frames are protected.
+`level(ALL)` retains its existing ADM-only behavior; add NDLSA explicitly
+using an ADM-level list as above.
+
+Unlike the mirrored July 2026 ADM layers, NDLSA is downloaded directly from
+the official World Bank catalogue's October 2026 shapefile release.
+The source dates differ, so check compatibility for your map and retain
+local copies for reproducibility. NDLSA is a legal-status layer, not a
+general inventory of active conflicts.
+
+#### Working with the ADM layers
 
 If you have already downloaded the files, then just covert them directly in geoframe rather downloading them again using the above command:
 
@@ -479,6 +517,7 @@ If you have already downloaded the files, then just covert them directly in geof
 geoframe create WB_ADM0, replace
 geoframe create WB_ADM1, replace
 geoframe create WB_ADM2, replace
+geoboundary WLD, source(worldbank) level(NDLSA) replace convert remove geoframe
 ```
 
 Remember that frames can checked using `frames dir` or one can also switch to an active frame to get the variables or merge datasets etc using `frame change <frame name>`.
@@ -488,15 +527,16 @@ Test out the data:
 ```stata
 geoplot ///
 	(area WB_ADM0 i.WB_REGION, lc(white) lw(0.1) ) ///
+	(area WB_NDLSA, fc(magenta) lc(black) lw(0.04)) ///
 	, ///
 	tight ///
 	project(robinson) background(water) grid(lc(white) label)	///
 	legend(pos(7)) ///
-	title("WORLD BANK's ADM0 boundaries (version: July 2026)") ///
-	note("Source: https://datacatalog.worldbank.org/search/dataset/0038272/World-Bank-Official-Boundaries.", size(2))
+	title("World Bank ADM0 boundaries and NDLSA") ///
+	note("Magenta: World Bank Non-Determined Legal Status Areas (NDLSA). ADM0: July 2026; NDLSA: October 2026.", size(2))
 ```
 
-<img src="/GIS/wb_admin0.png" width="100%">
+<img src="./GIS/wb_admin0.png" width="100%">
 
 
 Plot all the layers (warning, very large files!): 
@@ -505,17 +545,18 @@ Plot all the layers (warning, very large files!):
 
 ```stata
 geoplot ///
+	(area WB_NDLSA, fc(orange) lc(black) lw(0.04)) ///
 	(line WB_ADM2, lc(red) lw(0.02) ) ///
 	(line WB_ADM1, lc(blue) lw(0.05) ) ///
 	(line WB_ADM0, lc(black) lw(0.1) ) ///
 	, ///
 	tight ///
 	legend(pos(7))  ///
-	title("World Bank ADM0, ADM1, ADM2 boundaries (version: July 2026)", size(6)) ///
-	note("Source: https://datacatalog.worldbank.org/search/dataset/0038272/world-bank-official-boundaries", size(2.5))
+	title("World Bank ADM0, ADM1, ADM2 boundaries and NDLSA", size(6)) ///
+	note("Orange: World Bank Non-Determined Legal Status Areas (NDLSA). ADM0-ADM2: July 2026; NDLSA: October 2026.", size(2.5))
 ```
 
-<img src="/GIS/wb_release5.png" width="100%">
+<img src="./GIS/wb_release5.png" width="100%">
 
 
 
@@ -526,17 +567,22 @@ Please open an [issue](https://github.com/asjadnaqvi/stata-geoboundary/issues) t
 
 ## Disclaimer
 
-The Geographic Information System (GIS) data provided herein is for informational/educational purposes only and is not intended for use as a legal or engineering resource. While every effort has been made to ensure the accuracy and reliability of the data, it is provided "as is" without warranty of any kind.
+This package downloads third-party Geographic Information System (GIS) data for informational and educational purposes. The data are not intended as a legal or engineering resource and are provided "as is", without warranty of any kind. The package author and contributors do not guarantee their accuracy, completeness, or suitability for any particular purpose.
 
-The data provided through this GIS package assumes no liability for any inaccuracies, errors, or omissions in the data, nor for any decision made or action taken based on the information contained herein. Users of this data are responsible for verifying its accuracy and suitability for their intended purposes.
+To the extent permitted by applicable law, the package author and contributors accept no liability for errors or omissions in the data or for loss or damage arising from their use. Users are responsible for verifying the data and their suitability for the intended use.
 
-Please be advised that GIS data may be subject to change without notice due to updates, corrections, or other modifications. Users are encouraged to consult the original data sources or contact the provider for the most current information.
+Names, boundaries, and disputed-area classifications reflect the source datasets. Their inclusion does not imply endorsement by the package author or contributors, or any position on sovereignty, territorial claims, or legal status.
 
-By accessing or using the GIS data provided through this package, you acknowledge and agree to these terms and conditions.
+Each dataset remains subject to its source provider's licence, attribution requirements, and usage restrictions. The package's software licence does not replace these conditions.
 
+Source data may change without notice. Consult the original providers for current information and retain the release, retrieval date, and local files needed to reproduce your results.
 
 
 ## Change log
+
+**v1.31 (04 Nov 2026)**
+- Added optional World Bank disputed-area polygons with `level(NDLSA)`, kept separate from ADM layers.
+- Updated examples, help, references, and the disclaimer. Existing download defaults are unchanged.
 
 **v1.3 (15 Oct 2026)**
 - Minimum Stata version raised to 17.
@@ -574,7 +620,3 @@ By accessing or using the GIS data provided through this package, you acknowledg
 
 **v1.0 (25 Nov 2024)**
 - First release
-
-
-
-

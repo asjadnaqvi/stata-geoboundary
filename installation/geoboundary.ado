@@ -1,6 +1,7 @@
-*! geoboundary v1.3 (15 Oct 2026)
+*! geoboundary v1.31 (04 Nov 2026)
 *! Asjad Naqvi (asjadnaqvi@gmail.com)
 
+* v1.31 (04 Nov 2026): Optional World Bank NDLSA polygons downloaded directly from the official catalogue.
 * v1.3  (15 Oct 2026): Eurostat GISCO NUTS layers in WGS84, with vintage and scale selection. Requires Stata 17.
 * v1.23 (01 Sep 2026): Refreshed World Bank release 5 shapefiles (Jul 2026 update).
 * v1.22 (02 Nov 2025): Update to World Bank release 5 which now has ADM0-ADM2 boundaries.
@@ -20,18 +21,22 @@ Eurostat GISCO: https://gisco-services.ec.europa.eu/distribution/v2/nuts/
 
 /*
 
-The Geographic Information System (GIS) data provided herein is for informational/educational purposes only and is not intended for use 
-as a legal or engineering resource. While every effort has been made to ensure the accuracy and reliability of the data, it is provided 
-"as is" without warranty of any kind.
+This package downloads third-party Geographic Information System (GIS) data for informational and educational purposes.
+The data are not intended as a legal or engineering resource and are provided "as is", without warranty of any kind.
+The package author and contributors do not guarantee their accuracy, completeness, or suitability for any particular purpose.
 
-The data provided through this GIS package assumes no liability for any inaccuracies, errors, or omissions in the data, 
-nor for any decision made or action taken based on the information contained herein. 
-Users of this data are responsible for verifying its accuracy and suitability for their intended purposes.
+To the extent permitted by applicable law, the package author and contributors accept no liability for errors or omissions
+in the data or for loss or damage arising from their use. Users are responsible for verifying the data and their suitability
+for the intended use.
 
-Please be advised that GIS data may be subject to change without notice due to updates, corrections, or other modifications. 
-Users are encouraged to consult the original data sources or contact the provider for the most current information.
+Names, boundaries, and disputed-area classifications reflect the source datasets. Their inclusion does not imply endorsement
+by the package author or contributors, or any position on sovereignty, territorial claims, or legal status.
 
-By accessing or using the GIS data provided through this package, you acknowledge and agree to these terms and conditions.
+Each dataset remains subject to its source provider's licence, attribution requirements, and usage restrictions.
+The package's software licence does not replace these conditions.
+
+Source data may change without notice. Consult the original providers for current information and retain the release,
+retrieval date, and local files needed to reproduce your results.
 
 
 All files are in the standard EPSG: 4326 (WGS84) projection.
@@ -44,6 +49,7 @@ cap prog drop _geogisco
 cap prog drop _geogisco_run
 cap prog drop _geogisco_download
 cap prog drop _geob_retry
+cap prog drop _geowb_ndlsa
 cap prog drop _geometa
 
 program define geoboundary, rclass 
@@ -157,8 +163,13 @@ syntax anything, [level(string) convert replace remove name(string) source(strin
 		local lvl : word `i' of `level'
 		local lvl = upper("`lvl'")
 
-		if !inlist("`lvl'", "ADM0", "ADM1", "ADM2", "ADM3", "ADM4", "ADM5", "ALL") {
+		if "`lvl'" == "NDLSA" & "`source'" != "worldbank" {
+			di as error "level(NDLSA) requires source(worldbank)."
+			exit 198
+		}
+		if !inlist("`lvl'", "ADM0", "ADM1", "ADM2", "ADM3", "ADM4", "ADM5", "ALL", "NDLSA") {
 			display as error "Option {ul:`lvl'} is not valid. Valid options are {ul:ADM0}, {ul:ADM1}, {ul:ADM2}, {ul:ADM3}, {ul:ADM4}, {ul:ADM5}, {ul:ALL}."
+			if "`source'" == "worldbank" di as error "World Bank also supports {ul:NDLSA}."
 			local ++errcount
 		}
 		
@@ -168,6 +179,38 @@ syntax anything, [level(string) convert replace remove name(string) source(strin
 	if "`level'" == "ALL" | "`level'" == "all" {
 		local level ADM0 ADM1 ADM2 ADM3 ADM4 ADM5
 		local length1 : word count `level'
+	}
+	local has_ndlsa : list posof "NDLSA" in level
+	if `has_ndlsa' {
+		if "`convert'" == "" & "`geoframe'`remove'" != "" {
+			di as error "For NDLSA, geoframe and remove require convert."
+			exit 198
+		}
+		local ndlsa_out WB_NDLSA
+		if "`name'" != "" local ndlsa_out `name'_NDLSA
+		confirm name `ndlsa_out'
+		if "`geoframe'" != "" {
+			confirm name `ndlsa_out'_shp
+			which geoframe
+		}
+		if "`replace'" == "" {
+			foreach ext in shp shx dbf prj cpg {
+				confirm new file "WB_NDLSA.`ext'"
+			}
+			if "`convert'" != "" {
+				confirm new file "`ndlsa_out'.dta"
+				confirm new file "`ndlsa_out'_shp.dta"
+			}
+			if "`geoframe'" != "" {
+				foreach f in `ndlsa_out' `ndlsa_out'_shp {
+					capture frame `f': describe
+					if !_rc {
+						di as error "Frame `f' already exists; specify replace."
+						exit 110
+					}
+				}
+			}
+		}
 	}
 	
 	
@@ -356,11 +399,17 @@ syntax anything, [level(string) convert replace remove name(string) source(strin
 					local lvl = upper("`lvl'")
 					
 					// fetch
-					noisily display in yellow _newline "World Bank `lvl' (Jul 14, 2026): Fetching" _continue
+					if "`lvl'" == "NDLSA" noisily display in yellow _newline "World Bank NDLSA (official catalogue): Fetching" _continue
+					else noisily display in yellow _newline "World Bank `lvl' (Jul 14, 2026): Fetching" _continue
 					
 					local _check = 0
+					local conversion_replace replace
+					if "`lvl'" == "NDLSA" {
+						_geowb_ndlsa, `rep'
+						local conversion_replace `rep'
+					}
 					
-					if `skip' == 1 {
+					else if `skip' == 1 {
 						foreach j in shp prj shx dbf cpg {
 							*capture copy "`baseurl'/`x1'/`lvl'/geoBoundaries-`x1'-`lvl'.`j'" "`x1'_`lvl'.`j'", `rep'
 							
@@ -384,7 +433,7 @@ syntax anything, [level(string) convert replace remove name(string) source(strin
 														
 							if `skip' == 1 {
 								if "`name'"!="" {
-									_geob_retry spshape2dta WB_`lvl', replace saving(`name'_`lvl')
+									_geob_retry spshape2dta WB_`lvl', `conversion_replace' saving(`name'_`lvl')
 									noisily display in yellow _continue " > {bf:`name'_`lvl'.dta}, {bf:`name'_`lvl'_shp.dta} saved"
 									
 									if "`geoframe'" != "" {
@@ -393,7 +442,7 @@ syntax anything, [level(string) convert replace remove name(string) source(strin
 									}
 								}
 								else {
-									_geob_retry spshape2dta WB_`lvl', replace
+									_geob_retry spshape2dta WB_`lvl', `conversion_replace'
 									noisily display in yellow _continue " > {bf:WB_`lvl'.dta}, {bf:WB_`lvl'_shp.dta} saved"
 									
 									if "`geoframe'" != "" {
@@ -410,7 +459,7 @@ syntax anything, [level(string) convert replace remove name(string) source(strin
 							noisily display in yellow _continue  " > shapefiles deleted" 
 							
 							if `skip' == 1 {
-								foreach j in shp prj shx dbf {
+								foreach j in shp prj shx dbf cpg {
 									capture erase 	"WB_`lvl'.`j'" 	// Windows
 									capture rm 		"WB_`lvl'.`j'"	// MAC
 								}
@@ -422,6 +471,55 @@ syntax anything, [level(string) convert replace remove name(string) source(strin
 		}		
 	}
 	
+end
+
+program define _geowb_ndlsa
+	version 17
+	syntax, [replace]
+
+	local url "https://datacatalogfiles.worldbank.org/ddh-published/0038272/3/DR0095371/World%20Bank%20Official%20Boundaries%20%28Shapefiles%29/World%20Bank%20Official%20Boundaries%20-%20NDLSA.zip"
+	local remote "World Bank Official Boundaries - NDLSA"
+	local cwd `"`c(pwd)'"'
+	local sep = cond("`c(os)'" == "Windows", char(92), "/")
+	tempfile archive
+	local stage `"`archive'_ndlsa"'
+	_geob_retry copy "`url'" `"`archive'"'
+	mkdir `"`stage'"'
+	capture noisily {
+		quietly cd `"`stage'"'
+		unzipfile `"`archive'"', ifilter("World Bank Official Boundaries - NDLSA\.(shp|shx|dbf|prj|cpg)")
+		foreach ext in shp shx dbf prj cpg {
+			confirm file "`remote'.`ext'"
+		}
+		quietly cd `"`cwd'"'
+		foreach ext in shp shx dbf prj cpg {
+			_geob_retry copy `"`stage'`sep'`remote'.`ext'"' "WB_NDLSA.`ext'", `replace'
+		}
+	}
+	local rc = _rc
+	quietly cd `"`cwd'"'
+	foreach ext in shp shx dbf prj cpg {
+		local file `"`stage'`sep'`remote'.`ext'"'
+		capture confirm file `"`file'"'
+		if !_rc {
+			capture erase `"`file'"'
+			local cleanup_rc = _rc
+			if `cleanup_rc' {
+				di as error `"Could not remove temporary file: `file'"'
+				if !`rc' local rc = `cleanup_rc'
+			}
+		}
+	}
+	capture rmdir `"`stage'"'
+	local cleanup_rc = _rc
+	if `cleanup_rc' {
+		di as error `"Could not remove temporary directory: `stage'"'
+		if !`rc' local rc = `cleanup_rc'
+	}
+	if `rc' {
+		di as error "World Bank NDLSA download failed; any published raw files have been retained."
+		exit `rc'
+	}
 end
 
 program define _geogisco, rclass
